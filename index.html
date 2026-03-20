@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Intelligence Platform — Command Center</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base: #f0f4f8;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card2: #f8fafc;
+  --border: #e2e8f0;
+  --border-b: #cbd5e0;
+  --text-p: #0f172a;
+  --text-s: #475569;
+  --text-m: #94a3b8;
+  --green: #00a87e;
+  --yellow: #d4840a;
+  --red: #e02040;
+  --blue: #2563eb;
+  --purple: #7c3aed;
+  --cyan: #0099bb;
+  --font: 'Inter', -apple-system, sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg-base);color:var(--text-p);display:flex;min-height:100vh;font-size:13px;line-height:1.4}
+
+/* ── Sidebar ── */
+.sidebar{width:216px;min-height:100vh;background:var(--bg-surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-logo-t{font-size:11px;font-weight:800;color:var(--blue);letter-spacing:.12em;text-transform:uppercase}
+.sb-logo-s{font-size:9px;color:var(--text-m);margin-top:3px;letter-spacing:.1em;text-transform:uppercase}
+.sb-logo-badge{display:inline-block;margin-top:8px;background:rgba(0,212,161,.12);border:1px solid rgba(0,212,161,.3);color:var(--green);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.06em}
+.nav-sec{padding:10px 0;border-bottom:1px solid var(--border)}
+.nav-lbl{font-size:9px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.12em;padding:4px 16px 6px}
+.nav-it{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;border-left:2px solid transparent;color:var(--text-s);font-size:12px;font-weight:500;transition:all .12s}
+.nav-it:hover{background:var(--bg-card);color:var(--text-p)}
+.nav-it.active{background:rgba(77,158,255,.07);border-left-color:var(--blue);color:var(--blue)}
+.nav-ico{font-size:13px;width:16px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:10px;padding:2px 6px}
+.nav-badge.y{background:var(--yellow)}
+.sb-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Main ── */
+.main{margin-left:216px;flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* ── Topbar ── */
+.topbar{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:11px 22px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.tb-title{font-size:14px;font-weight:800;color:var(--text-p);flex:1;min-width:200px}
+.tb-sub{font-size:10px;color:var(--text-m)}
+.fl-grp{display:flex;align-items:center;gap:6px}
+.fl-lbl{font-size:9px;color:var(--text-m);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.fl-sel{background:var(--bg-card);border:1px solid var(--border);color:var(--text-p);padding:5px 9px;border-radius:5px;font-size:11px;font-family:var(--font);cursor:pointer;outline:none;transition:border .12s}
+.fl-sel:focus{border-color:var(--blue)}
+.btn{background:var(--blue);color:#fff;border:none;padding:6px 13px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .12s}
+.btn:hover{opacity:.85}
+.btn-o{background:transparent;border:1px solid var(--border-b);color:var(--text-s)}
+
+/* ── AI Banner ── */
+.ai-banner{background:linear-gradient(135deg,#eff6ff 0%,#f0f9ff 100%);border:1px solid rgba(37,99,235,.2);border-radius:10px;padding:16px 20px;margin:18px 22px 0;display:flex;gap:14px;align-items:flex-start}
+.ai-ico{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ai-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:5px}
+.ai-txt{font-size:12.5px;color:var(--text-p);line-height:1.65}
+.ai-txt strong{color:var(--blue)}
+.ai-txt .ri{color:var(--red)}
+.ai-txt .po{color:var(--green)}
+.ai-txt .wa{color:var(--yellow)}
+.ai-meta{font-size:10px;color:var(--text-m);margin-top:6px}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;gap:2px;padding:0 22px;background:var(--bg-surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-it{padding:11px 14px;font-size:11px;font-weight:600;color:var(--text-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .12s}
+.tab-it:hover{color:var(--text-s)}
+.tab-it.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ── Zone content ── */
+.zone{display:none;padding:22px}
+.zone.active{display:block}
+
+/* ── Section headers ── */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.sec-badge{background:rgba(77,158,255,.1);border:1px solid rgba(77,158,255,.25);color:var(--blue);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:3px}
+.sec-badge.g{background:rgba(0,212,161,.1);border-color:rgba(0,212,161,.25);color:var(--green)}
+.sec-badge.r{background:rgba(255,69,96,.1);border-color:rgba(255,69,96,.25);color:var(--red)}
+.sec-badge.y{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25);color:var(--yellow)}
+.sec-badge.p{background:rgba(155,109,255,.1);border-color:rgba(155,109,255,.25);color:var(--purple)}
+.sec-t{font-size:17px;font-weight:800;color:var(--text-p)}
+.sec-s{font-size:11px;color:var(--text-m);margin-top:1px}
+.sec-acts{margin-left:auto;display:flex;gap:8px}
+
+/* ── Metric cards ── */
+.mg{display:grid;gap:12px}
+.mg4{grid-template-columns:repeat(4,1fr)}
+.mg3{grid-template-columns:repeat(3,1fr)}
+.mg2{grid-template-columns:repeat(2,1fr)}
+.mc{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .15s}
+.mc:hover{border-color:var(--border-b)}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.mc.b::before{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.mc.g::before{background:linear-gradient(90deg,var(--green),#00b8d4)}
+.mc.r::before{background:var(--red)}
+.mc.y::before{background:var(--yellow)}
+.mc.p::before{background:var(--purple)}
+.mc-lbl{font-size:9.5px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
+.mc-val{font-size:26px;font-weight:900;color:var(--text-p);line-height:1;margin-bottom:7px}
+.mc-val.g{color:var(--green)}
+.mc-val.b{color:var(--blue)}
+.mc-val.r{color:var(--red)}
+.mc-val.y{color:var(--yellow)}
+.mc-val.p{color:var(--purple)}
+.mc-dlt{font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px}
+.mc-dlt.up{color:var(--green)}
+.mc-dlt.dn{color:var(--red)}
+.mc-dlt.nt{color:var(--text-m)}
+.mc-sub{font-size:10px;color:var(--text-m);margin-top:3px}
+
+/* ── Chart cards ── */
+.cc{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:18px}
+.cc-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.cc-t{font-size:13px;font-weight:700;color:var(--text-p)}
+.cc-s{font-size:10px;color:var(--text-m);margin-top:2px}
+.cc-legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.leg-it{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-s)}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── Grids ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:14px}
+.g31{display:grid;grid-template-columns:3fr 1fr;gap:14px}
+
+/* ── Risk badges ── */
+.rb{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.rb.low{background:rgba(0,212,161,.1);color:var(--green);border:1px solid rgba(0,212,161,.25)}
+.rb.mod{background:rgba(245,166,35,.1);color:var(--yellow);border:1px solid rgba(245,166,35,.25)}
+.rb.high{background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.25)}
+
+/* ── Risk circle ── */
+.rc{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;border:2px solid;flex-shrink:0}
+.rc.low{background:rgba(0,212,161,.08);border-color:var(--green);color:var(--green)}
+.rc.mod{background:rgba(245,166,35,.08);border-color:var(--yellow);color:var(--yellow)}
+.rc.high{background:rgba(255,69,96,.08);border-color:var(--red);color:var(--red)}
+
+/* ── Tables ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:9.5px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;border-bottom:1px solid var(--border)}
+.tbl td{padding:11px 12px;border-bottom:1px solid rgba(0,0,0,.07);font-size:12px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(0,0,0,.03)}
+.tbl-a{font-weight:600;color:var(--text-p)}
+.tbl-s{font-size:10px;color:var(--text-m)}
+
+/* ── Progress ── */
+.pbar{background:rgba(0,0,0,.08);border-radius:3px;height:5px;overflow:hidden}
+.pbfill{height:100%;border-radius:3px}
+.pbfill.g{background:var(--green)}
+.pbfill.y{background:var(--yellow)}
+.pbfill.r{background:var(--red)}
+.pbfill.b{background:var(--blue)}
+.pbfill.p{background:var(--purple)}
+
+/* ── Funnel ── */
+.funnel{display:flex;flex-direction:column;gap:7px}
+.fstep{display:flex;align-items:center;gap:10px}
+.flbl{width:140px;font-size:11px;color:var(--text-s);text-align:right}
+.fbar-o{flex:1;background:rgba(0,0,0,.06);border-radius:4px;height:30px;overflow:hidden}
+.fbar-i{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap}
+.fval{width:55px;font-size:12px;font-weight:700;color:var(--text-p);text-align:right}
+.fpct{width:38px;font-size:10px;color:var(--text-m);text-align:right}
+
+/* ── Heatmap ── */
+.hm-tbl{width:100%;border-collapse:separate;border-spacing:3px}
+.hm-tbl th{font-size:9.5px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.06em;padding:5px 8px;text-align:center}
+.hm-tbl th:first-child{text-align:left}
+.hm-tbl td{padding:3px;text-align:center}
+.hm-tbl td:first-child{text-align:left;font-size:10px;color:var(--text-s);padding:5px 10px 5px 0;white-space:nowrap;font-weight:500}
+.hm-cell{display:inline-flex;align-items:center;justify-content:center;width:52px;height:24px;border-radius:4px;font-size:10px;font-weight:700}
+
+/* ── Action cards ── */
+.ac{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;margin-bottom:10px}
+.ac:last-child{margin-bottom:0}
+.ac:hover{border-color:var(--border-b)}
+.ac.urg{border-left:3px solid var(--red)}
+.ac.wrn{border-left:3px solid var(--yellow)}
+.ac.inf{border-left:3px solid var(--blue)}
+.ac-ico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ac-ico.r{background:rgba(255,69,96,.12)}
+.ac-ico.y{background:rgba(245,166,35,.12)}
+.ac-ico.b{background:rgba(77,158,255,.12)}
+.ac-ico.g{background:rgba(0,212,161,.12)}
+.ac-acct{font-size:13px;font-weight:700;color:var(--text-p)}
+.ac-trig{font-size:11px;color:var(--text-s);margin-top:3px;line-height:1.5}
+.ac-rec{margin-top:7px;font-size:11px;color:var(--blue);font-weight:600}
+.ac-rec::before{content:'→ '}
+.ac-meta{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
+.tag.r{background:rgba(255,69,96,.1);color:var(--red)}
+.tag.y{background:rgba(245,166,35,.1);color:var(--yellow)}
+.tag.b{background:rgba(77,158,255,.1);color:var(--blue)}
+.tag.g{background:rgba(0,212,161,.1);color:var(--green)}
+.tag.p{background:rgba(155,109,255,.1);color:var(--purple)}
+.ac-side{text-align:right;flex-shrink:0}
+.ac-arr{font-size:14px;font-weight:800;color:var(--text-p)}
+.ac-days{font-size:10px;color:var(--text-m);margin-top:3px}
+
+/* ── Renewal pipeline ── */
+.ren-pipe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ren-bkt{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.ren-bkt-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ren-bkt-t{font-size:12px;font-weight:700;color:var(--text-p)}
+.ren-bkt-c{font-size:10px;color:var(--text-m)}
+.ren-item{padding:11px 14px;border-bottom:1px solid rgba(0,0,0,.07)}
+.ren-item:last-child{border-bottom:none}
+.ren-acc{font-size:12px;font-weight:600;color:var(--text-p);margin-bottom:5px}
+.ren-arr{font-size:14px;font-weight:800;color:var(--blue);margin-bottom:4px}
+.ren-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ren-prob{font-size:11px;font-weight:700}
+
+/* ── Lifecycle ── */
+.lc{display:flex;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.lc-stage{flex:1;text-align:center;padding:18px 10px;border-right:1px solid var(--border);position:relative}
+.lc-stage:last-child{border-right:none}
+.lc-n{font-size:26px;font-weight:900;color:var(--text-p);margin-bottom:3px}
+.lc-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-m);margin-bottom:7px}
+.lc-arr{font-size:11px;font-weight:600;color:var(--blue)}
+.lc-bar{height:3px;margin-top:10px;border-radius:2px}
+
+/* ── Scenario cards ── */
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:16px;text-align:center}
+.sc-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
+.sc-val{font-size:26px;font-weight:900;margin-bottom:4px}
+.sc-desc{font-size:10.5px;color:var(--text-m)}
+
+/* ── Whitespace matrix ── */
+.ws-tbl{width:100%;border-collapse:separate;border-spacing:4px}
+.ws-tbl th{font-size:9.5px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.06em;padding:5px 10px;text-align:center}
+.ws-tbl th:first-child{text-align:left}
+.ws-tbl td{text-align:center;padding:3px}
+.ws-tbl td:first-child{text-align:left;font-size:10px;color:var(--text-s);font-weight:500;padding:5px 10px 5px 0;white-space:nowrap}
+.ws-c{display:inline-flex;align-items:center;justify-content:center;width:56px;height:26px;border-radius:5px;font-size:10px;font-weight:700}
+.ws-c.a{background:rgba(0,212,161,.18);color:var(--green)}
+.ws-c.p{background:rgba(245,166,35,.18);color:var(--yellow)}
+.ws-c.w{background:rgba(255,69,96,.06);color:var(--text-m);border:1px dashed rgba(255,69,96,.35)}
+.ws-c.n{background:rgba(77,158,255,.12);color:var(--blue)}
+
+/* ── Expansion rows ── */
+.exp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+.exp-row:last-child{border-bottom:none}
+.exp-rank{font-size:11px;font-weight:800;color:var(--text-m);width:22px;text-align:center;flex-shrink:0}
+.exp-det{flex:1}
+.exp-n{font-size:13px;font-weight:600;color:var(--text-p)}
+.exp-sig{font-size:10px;color:var(--text-m);margin-top:2px}
+.exp-opp{text-align:right;flex-shrink:0}
+.exp-arr{font-size:13px;font-weight:800;color:var(--green)}
+.exp-lbl{font-size:9px;color:var(--text-m)}
+
+/* ── VRI ── */
+.vri-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+.vri-row:last-child{border-bottom:none}
+.vri-n{font-size:12px;font-weight:600;color:var(--text-p);flex:1}
+.vri-score{font-size:12px;font-weight:800;width:36px;text-align:right}
+.vri-bar-wrap{width:120px;flex-shrink:0}
+
+/* ── Separator ── */
+.sep{display:flex;align-items:center;gap:10px;margin:20px 0 14px}
+.sep-line{flex:1;height:1px;background:var(--border)}
+.sep-t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-m);white-space:nowrap}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg-base)}
+::-webkit-scrollbar-thumb{background:var(--border-b);border-radius:3px;border:1px solid var(--border)}
+
+/* ── Risk trajectory markers ── */
+.traj-events{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.traj-evt{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-s)}
+.traj-dot{width:8px;height:8px;border-radius:50%}
+
+@media(max-width:1300px){.mg4{grid-template-columns:repeat(2,1fr)}.g21,.g12,.g31{grid-template-columns:1fr}.ren-pipe,.sc-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.mg4,.mg3,.mg2{grid-template-columns:1fr}.g2,.g3,.g21,.g12,.g31{grid-template-columns:1fr}.ren-pipe,.sc-grid{grid-template-columns:1fr}.lc{flex-direction:column}.lc-stage{border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ SIDEBAR ══════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-t">CS Intelligence</div>
+    <div class="sb-logo-s">Command Center · Q1 2026</div>
+    <div class="sb-logo-badge">LIVE</div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Revenue & Risk</div>
+    <div class="nav-it active" onclick="nav(this,'zone1')"><span class="nav-ico">📊</span> Revenue Intelligence</div>
+    <div class="nav-it" onclick="nav(this,'zone2')"><span class="nav-ico">⚡</span> Predictive Risk <span class="nav-badge">11</span></div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Customer Health</div>
+    <div class="nav-it" onclick="nav(this,'zone3')"><span class="nav-ico">🎯</span> Adoption & Value</div>
+    <div class="nav-it" onclick="nav(this,'zone4')"><span class="nav-ico">🚀</span> Growth & Expansion</div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Operations</div>
+    <div class="nav-it" onclick="nav(this,'zone5')"><span class="nav-ico">🔄</span> Renewal Command <span class="nav-badge y">8</span></div>
+    <div class="nav-it" onclick="nav(this,'zone6')"><span class="nav-ico">⚠️</span> Action Center <span class="nav-badge">5</span></div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Configuration</div>
+    <div class="nav-it"><span class="nav-ico">🗂️</span> Account Portfolio</div>
+    <div class="nav-it"><span class="nav-ico">👥</span> CSM Performance</div>
+    <div class="nav-it"><span class="nav-ico">⚙️</span> Settings</div>
+  </div>
+
+  <div class="sb-foot">
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="pulse"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-p)">Live Intelligence</div>
+        <div style="font-size:10px;color:var(--text-m)">Updated 3 min ago</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════ MAIN ══════════════════════════════ -->
+<div class="main">
+
+<!-- ── Topbar ── -->
+<div class="topbar">
+  <div style="flex:1;min-width:180px">
+    <div class="tb-title">Customer Success Intelligence Platform</div>
+    <div class="tb-sub">Fiscal Year 2026 · Q1 Operating View · 15 Accounts · $24.8M ARR</div>
+  </div>
+  <div class="fl-grp"><span class="fl-lbl">Region</span>
+    <select id="fltRegion" class="fl-sel" onchange="applyFilter()">
+      <option value="">All Regions</option><option value="APAC">APAC</option><option value="UK/EU">UK/EU</option><option value="AMER">AMER</option><option value="CH">CH</option><option value="MEA">MEA</option><option value="NOR">NOR</option>
+    </select>
+  </div>
+  <div class="fl-grp"><span class="fl-lbl">Segment</span>
+    <select id="fltSegment" class="fl-sel" onchange="applyFilter()">
+      <option value="">All Segments</option><option value="High touch">High touch</option><option value="Low touch">Low touch</option><option value="Tech touch">Tech touch</option>
+    </select>
+  </div>
+  <div class="fl-grp"><span class="fl-lbl">Product</span>
+    <select id="fltProduct" class="fl-sel" onchange="applyFilter()">
+      <option value="">All Products</option><option value="Trade">Trade</option><option value="Net">Net</option><option value="Calc">Calc</option><option value="Futures">Futures</option><option value="Carbon">Carbon</option><option value="Contracts">Contracts</option><option value="Recap Manager">Recap Manager</option><option value="Marine Analytics">Marine Analytics</option><option value="Commodity Analytics">Commodity Analytics</option>
+    </select>
+  </div>
+  <div class="fl-grp"><span class="fl-lbl">CSM</span>
+    <select class="fl-sel" onchange="applyFilter()">
+      <option>All CSMs</option><option>Sarah Chen</option><option>Marcus Webb</option><option>Priya Patel</option><option>Jordan Kim</option>
+    </select>
+  </div>
+  <button class="btn">⬇ Export Report</button>
+</div>
+
+<!-- ── AI Narrative ── -->
+<div class="ai-banner">
+  <div class="ai-ico">🤖</div>
+  <div style="flex:1">
+    <div class="ai-lbl">AI Executive Intelligence Summary · Generated March 11, 2026 · 09:14 GMT</div>
+    <div class="ai-txt">
+      Customer health remains <span class="po"><strong>moderately stable</strong></span> with Net Revenue Retention at <strong>116%</strong>, driven by strong expansion activity across enterprise accounts.
+      However, <span class="ri"><strong>$4.1M in ARR shows elevated churn probability</strong></span>, primarily driven by declining product adoption in 5 strategic accounts and 3 unresolved executive escalations.
+      <span class="wa"><strong>Three renewals totalling $6.1M are due within 120 days</strong></span> and require immediate executive engagement —
+      Nexus Financial ($2.8M), Apex Manufacturing ($1.9M), and Vertex Analytics ($1.4M) are all classified High Risk.
+      <span class="po"><strong>Expansion opportunity remains strong across 12 accounts</strong></span> where feature adoption exceeds 70%, representing <strong>$3.8M in identified expansion ARR</strong>.
+      Recommended priority: schedule executive alignment meetings for Nexus Financial and Apex Manufacturing this week.
+    </div>
+    <div class="ai-meta">Confidence: 94% · Signals analysed: 847 · Model: CS-Intelligence v3.2 · Data freshness: 3 min · Next refresh: 12 min</div>
+  </div>
+  <button class="btn btn-o" style="flex-shrink:0;font-size:10px;white-space:nowrap">↺ Regenerate</button>
+</div>
+
+<!-- ── Tab Bar ── -->
+<div class="tab-bar">
+  <div class="tab-it active" onclick="tab(this,'zone1')">Zone 1: Revenue Intelligence</div>
+  <div class="tab-it" onclick="tab(this,'zone2')">Zone 2: Predictive Risk</div>
+  <div class="tab-it" onclick="tab(this,'zone3')">Zone 3: Adoption & Value</div>
+  <div class="tab-it" onclick="tab(this,'zone4')">Zone 4: Growth & Expansion</div>
+  <div class="tab-it" onclick="tab(this,'zone5')">Zone 5: Renewal Command</div>
+  <div class="tab-it" onclick="tab(this,'zone6')">Executive Action Center</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 1 — REVENUE INTELLIGENCE
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone1" class="zone active">
+
+  <div class="sec-hdr">
+    <span class="sec-badge b">Zone 1</span>
+    <div><div class="sec-t">Revenue Intelligence Overview</div><div class="sec-s">What is happening to our customer revenue?</div></div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="mg mg4" style="margin-bottom:14px">
+    <div class="mc b">
+      <div class="mc-lbl">Total ARR</div>
+      <div class="mc-val b">$24.8M</div>
+      <div class="mc-dlt up">▲ 15.9% YoY</div>
+      <div class="mc-sub">vs $21.4M prior period</div>
+    </div>
+    <div class="mc g">
+      <div class="mc-lbl">Net Revenue Retention</div>
+      <div class="mc-val g">116%</div>
+      <div class="mc-dlt up">▲ +4pp vs Q4 2025</div>
+      <div class="mc-sub">Target: 115% · Status: On Track</div>
+    </div>
+    <div class="mc g">
+      <div class="mc-lbl">Expansion Revenue</div>
+      <div class="mc-val g">+$4.2M</div>
+      <div class="mc-dlt up">▲ 23% vs prior period</div>
+      <div class="mc-sub">12 accounts expanding</div>
+    </div>
+    <div class="mc r">
+      <div class="mc-lbl">ARR at Risk</div>
+      <div class="mc-val r">$4.1M</div>
+      <div class="mc-dlt dn">▲ Risk up from $2.8M</div>
+      <div class="mc-sub">16.5% of total ARR</div>
+    </div>
+  </div>
+
+  <div class="mg mg4" style="margin-bottom:18px">
+    <div class="mc y">
+      <div class="mc-lbl">Churn Revenue</div>
+      <div class="mc-val y">-$0.4M</div>
+      <div class="mc-dlt nt">— Stable vs prior</div>
+      <div class="mc-sub">2 accounts lost</div>
+    </div>
+    <div class="mc r">
+      <div class="mc-lbl">Revenue Contraction</div>
+      <div class="mc-val r">-$0.4M</div>
+      <div class="mc-dlt dn">▲ Increased from -$0.2M</div>
+      <div class="mc-sub">Downsell 3 accounts</div>
+    </div>
+    <div class="mc p">
+      <div class="mc-lbl">Expansion Opportunity</div>
+      <div class="mc-val p">$3.8M</div>
+      <div class="mc-dlt up">▲ Identified pipeline</div>
+      <div class="mc-sub">12 accounts qualified</div>
+    </div>
+    <div class="mc b">
+      <div class="mc-lbl">GRR (Gross Retention)</div>
+      <div class="mc-val b">97.6%</div>
+      <div class="mc-dlt up">▲ +1pp vs Q4 2025</div>
+      <div class="mc-sub">Target: 96% · Exceeding</div>
+    </div>
+  </div>
+
+  <div class="g21" style="margin-bottom:14px">
+    <!-- NRR Waterfall -->
+    <div class="cc">
+      <div class="cc-hdr">
+        <div><div class="cc-t">Net Revenue Retention Waterfall</div><div class="cc-s">ARR movement: Starting → Expansion → Contraction → Churn → Ending</div></div>
+        <div class="cc-legend">
+          <span class="leg-it"><span class="leg-sq" style="background:var(--blue)"></span>Base ARR</span>
+          <span class="leg-it"><span class="leg-sq" style="background:var(--green)"></span>Expansion</span>
+          <span class="leg-it"><span class="leg-sq" style="background:var(--red)"></span>Contraction/Churn</span>
+        </div>
+      </div>
+      <canvas id="waterfallChart" height="180"></canvas>
+    </div>
+    <!-- Portfolio Segmentation -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Portfolio Health Segmentation</div><div class="cc-s">ARR by risk classification</div></div></div>
+      <canvas id="portfolioChart" height="180"></canvas>
+      <div style="margin-top:14px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px">
+            <span style="display:flex;align-items:center;gap:6px"><span class="leg-dot" style="background:var(--green)"></span><span style="color:var(--text-s)">Healthy Revenue</span></span>
+            <span style="color:var(--green);font-weight:700">$17.6M <span style="color:var(--text-m);font-weight:400">· 71%</span></span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px">
+            <span style="display:flex;align-items:center;gap:6px"><span class="leg-dot" style="background:var(--yellow)"></span><span style="color:var(--text-s)">Watchlist Revenue</span></span>
+            <span style="color:var(--yellow);font-weight:700">$4.1M <span style="color:var(--text-m);font-weight:400">· 16.5%</span></span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px">
+            <span style="display:flex;align-items:center;gap:6px"><span class="leg-dot" style="background:var(--red)"></span><span style="color:var(--text-s)">High Risk Revenue</span></span>
+            <span style="color:var(--red);font-weight:700">$3.1M <span style="color:var(--text-m);font-weight:400">· 12.5%</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARR by Region & Segment -->
+  <div class="g2" style="margin-bottom:14px">
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">ARR by Region</div><div class="cc-s">Revenue distribution across geographies</div></div></div>
+      <canvas id="regionChart" height="160"></canvas>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">ARR by Customer Segment</div><div class="cc-s">Enterprise, Mid-Market, SMB breakdown</div></div></div>
+      <canvas id="segmentChart" height="160"></canvas>
+    </div>
+  </div>
+
+  <!-- ARR Trend -->
+  <div class="cc">
+    <div class="cc-hdr">
+      <div><div class="cc-t">ARR Trend & NRR History</div><div class="cc-s">12-month rolling view with NRR overlay</div></div>
+      <div class="cc-legend">
+        <span class="leg-it"><span class="leg-sq" style="background:var(--blue)"></span>Total ARR</span>
+        <span class="leg-it"><span class="leg-sq" style="background:var(--green)"></span>NRR %</span>
+      </div>
+    </div>
+    <canvas id="arrTrendChart" height="140"></canvas>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 2 — PREDICTIVE RISK INTELLIGENCE
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone2" class="zone">
+
+  <div class="sec-hdr">
+    <span class="sec-badge r">Zone 2</span>
+    <div><div class="sec-t">Predictive Customer Risk Intelligence</div><div class="sec-s">Churn risk scored 6–9 months before renewal · 4 signal categories analysed · filter by region, segment &amp; product</div></div>
+  </div>
+
+  <!-- Zone 2 Filters -->
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:10px 14px;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:8px;align-items:center">
+    <div class="fl-grp"><span class="fl-lbl">By Region</span>
+      <select id="z2Region" class="fl-sel" onchange="renderRiskTable()">
+        <option value="">All Regions</option><option value="APAC">APAC</option><option value="UK/EU">UK/EU</option><option value="AMER">AMER</option><option value="CH">CH</option><option value="MEA">MEA</option><option value="NOR">NOR</option>
+      </select>
+    </div>
+    <div class="fl-grp"><span class="fl-lbl">By Segment</span>
+      <select id="z2Segment" class="fl-sel" onchange="renderRiskTable()">
+        <option value="">All Segments</option><option value="High touch">High touch</option><option value="Low touch">Low touch</option><option value="Tech touch">Tech touch</option>
+      </select>
+    </div>
+    <div class="fl-grp"><span class="fl-lbl">By Product</span>
+      <select id="z2Product" class="fl-sel" onchange="renderRiskTable()">
+        <option value="">All Products</option><option value="Trade">Trade</option><option value="Net">Net</option><option value="Calc">Calc</option><option value="Futures">Futures</option><option value="Carbon">Carbon</option><option value="Contracts">Contracts</option><option value="Recap Manager">Recap Manager</option><option value="Marine Analytics">Marine Analytics</option><option value="Commodity Analytics">Commodity Analytics</option>
+      </select>
+    </div>
+    <div id="z2FilterCount" style="margin-left:auto;font-size:11px;color:var(--text-s);font-weight:600"></div>
+  </div>
+
+  <!-- Risk KPIs -->
+  <div class="mg mg3" style="margin-bottom:14px">
+    <div class="mc g">
+      <div class="mc-lbl">Low Risk Accounts</div>
+      <div class="mc-val g">9</div>
+      <div class="mc-dlt nt">Score: 0–30%</div>
+      <div class="mc-sub" style="margin-top:6px;font-size:12px;font-weight:700;color:var(--green)">$17.6M ARR · 71%</div>
+    </div>
+    <div class="mc y">
+      <div class="mc-lbl">Moderate Risk Accounts</div>
+      <div class="mc-val y">3</div>
+      <div class="mc-dlt nt">Score: 31–60%</div>
+      <div class="mc-sub" style="margin-top:6px;font-size:12px;font-weight:700;color:var(--yellow)">$4.1M ARR · 16.5%</div>
+    </div>
+    <div class="mc r">
+      <div class="mc-lbl">High Risk Accounts</div>
+      <div class="mc-val r">3</div>
+      <div class="mc-dlt dn">▲ Up from 1 last quarter</div>
+      <div class="mc-sub" style="margin-top:6px;font-size:12px;font-weight:700;color:var(--red)">$6.1M ARR · 24.6%</div>
+    </div>
+  </div>
+
+  <div class="g21" style="margin-bottom:14px">
+    <!-- Risk distribution chart -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Churn Risk Score Distribution</div><div id="riskDistSub" class="cc-s">All accounts by probability band · stacked by product</div></div></div>
+      <canvas id="riskDistChart" height="200"></canvas>
+    </div>
+    <!-- Signal model -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Signal Model Weights</div><div class="cc-s">Churn probability inputs</div></div></div>
+      <canvas id="signalChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Account Risk Table -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr">
+      <div><div class="cc-t">Account Risk Scorecard</div><div class="cc-s">Sorted by risk score descending · click row to inspect drivers</div></div>
+      <div style="display:flex;gap:8px">
+        <span class="rb low">● Low (9)</span>
+        <span class="rb mod">● Moderate (3)</span>
+        <span class="rb high">● High (3)</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="tbl" id="riskTable" style="min-width:1200px">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Region</th>
+          <th>Segment</th>
+          <th>Products</th>
+          <th>Owner</th>
+          <th>ARR</th>
+          <th>Churn / Reduction Value</th>
+          <th>Health Score</th>
+          <th>Risk Score</th>
+          <th>Risk Level</th>
+          <th>Renewal (days)</th>
+          <th>Usage Trend</th>
+          <th>Last Meeting</th>
+          <th>Issue</th>
+          <th>Immediate Next Steps</th>
+        </tr>
+      </thead>
+      <tbody id="riskTableBody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Closed Lost Opportunities -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr">
+      <div>
+        <div class="cc-t">Closed Lost Opportunities — Revisit Pipeline</div>
+        <div id="closedLostSub" class="cc-s">Products previously lost · sorted by revisit priority · filtered by active Region / Segment / Product selection</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="tbl" id="closedLostTable" style="min-width:900px">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Region</th>
+          <th>Segment</th>
+          <th>Product Lost</th>
+          <th>Opportunity</th>
+          <th>Date Lost</th>
+          <th>Days Since</th>
+          <th>Reason Lost</th>
+          <th>Potential ARR</th>
+          <th>Account Risk</th>
+          <th>Revisit Priority</th>
+        </tr>
+      </thead>
+      <tbody id="closedLostBody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <!-- Risk Driver Contribution (Nexus Financial) -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Risk Driver Analysis — Nexus Financial</div><div class="cc-s">Contribution breakdown for highest-risk account ($2.8M ARR)</div></div></div>
+      <canvas id="riskDriverChart" height="220"></canvas>
+    </div>
+
+    <!-- Risk Trajectory -->
+    <div class="cc">
+      <div class="cc-hdr">
+        <div><div class="cc-t">Risk Trajectory — Nexus Financial</div><div class="cc-s">6-month risk evolution with intervention markers</div></div>
+      </div>
+      <canvas id="riskTrajChart" height="180"></canvas>
+      <div class="traj-events">
+        <div class="traj-evt"><span class="traj-dot" style="background:#60a5fa"></span>Oct: QBR Conducted</div>
+        <div class="traj-evt"><span class="traj-dot" style="background:#f59e0b"></span>Dec: Usage drop detected</div>
+        <div class="traj-evt"><span class="traj-dot" style="background:#ef4444"></span>Jan: Exec sponsor left</div>
+        <div class="traj-evt"><span class="traj-dot" style="background:#a78bfa"></span>Feb: Product fix deployed</div>
+        <div class="traj-evt"><span class="traj-dot" style="background:#34d399"></span>Mar: Success plan launched</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 3 — ADOPTION & VALUE REALIZATION
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone3" class="zone">
+
+  <div class="sec-hdr">
+    <span class="sec-badge g">Zone 3</span>
+    <div><div class="sec-t">Adoption & Value Realization Intelligence</div><div class="sec-s">Are customers achieving meaningful value from the product?</div></div>
+  </div>
+
+  <!-- Adoption KPIs -->
+  <div class="mg mg4" style="margin-bottom:14px">
+    <div class="mc g">
+      <div class="mc-lbl">License Utilisation</div>
+      <div class="mc-val g">73%</div>
+      <div class="mc-dlt up">▲ +5pp vs prior quarter</div>
+      <div class="mc-sub">1,244 / 1,700 seats active</div>
+    </div>
+    <div class="mc b">
+      <div class="mc-lbl">Active User Rate</div>
+      <div class="mc-val b">68%</div>
+      <div class="mc-dlt nt">— Flat vs Q4</div>
+      <div class="mc-sub">DAU/MAU: 0.41</div>
+    </div>
+    <div class="mc y">
+      <div class="mc-lbl">Feature Adoption Rate</div>
+      <div class="mc-val y">61%</div>
+      <div class="mc-dlt dn">▼ -2pp vs target</div>
+      <div class="mc-sub">Target: 70% by Q2</div>
+    </div>
+    <div class="mc p">
+      <div class="mc-lbl">Core Workflow Completion</div>
+      <div class="mc-val p">54%</div>
+      <div class="mc-dlt dn">▼ Bottleneck detected</div>
+      <div class="mc-sub">Avg 3.2 workflows / user</div>
+    </div>
+  </div>
+
+  <div class="g12" style="margin-bottom:14px">
+    <!-- License Utilisation Funnel -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">License Utilisation Funnel</div><div class="cc-s">From provisioned to engaged users</div></div></div>
+      <div class="funnel" id="adoptionFunnel">
+        <div class="fstep">
+          <div class="flbl">Licensed Users</div>
+          <div class="fbar-o"><div class="fbar-i" style="width:100%;background:linear-gradient(90deg,#1e3a6e,#1a4fa8)">1,700 users</div></div>
+          <div class="fval">1,700</div><div class="fpct">100%</div>
+        </div>
+        <div class="fstep">
+          <div class="flbl">Assigned Users</div>
+          <div class="fbar-o"><div class="fbar-i" style="width:89%;background:linear-gradient(90deg,#1e4a8e,#1a5fc8)">1,516 users</div></div>
+          <div class="fval">1,516</div><div class="fpct">89%</div>
+        </div>
+        <div class="fstep">
+          <div class="flbl">Active Users</div>
+          <div class="fbar-o"><div class="fbar-i" style="width:73%;background:linear-gradient(90deg,#005c42,#00a07a)">1,244 users</div></div>
+          <div class="fval">1,244</div><div class="fpct" style="color:var(--yellow)">73%</div>
+        </div>
+        <div class="fstep">
+          <div class="flbl">Engaged Users</div>
+          <div class="fbar-o"><div class="fbar-i" style="width:58%;background:linear-gradient(90deg,#006540,#00d4a1)">986 users</div></div>
+          <div class="fval">986</div><div class="fpct" style="color:var(--yellow)">58%</div>
+        </div>
+        <div class="fstep">
+          <div class="flbl">Power Users</div>
+          <div class="fbar-o"><div class="fbar-i" style="width:28%;background:linear-gradient(90deg,#004030,#00b890)">476 users</div></div>
+          <div class="fval">476</div><div class="fpct" style="color:var(--red)">28%</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:10px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.2);border-radius:6px;font-size:11px;color:var(--yellow)">
+        ⚠ Drop-off alert: 16% of assigned users never logged in · 30% activated but disengaged after onboarding
+      </div>
+    </div>
+
+    <!-- Adoption Over Time -->
+    <div class="cc">
+      <div class="cc-hdr">
+        <div><div class="cc-t">Feature Adoption Trends</div><div class="cc-s">Module-level adoption over 6 months</div></div>
+        <div class="cc-legend">
+          <span class="leg-it"><span class="leg-dot" style="background:var(--blue)"></span>Contracts</span>
+          <span class="leg-it"><span class="leg-dot" style="background:var(--green)"></span>Trading</span>
+          <span class="leg-it"><span class="leg-dot" style="background:var(--yellow)"></span>Market Intel</span>
+          <span class="leg-it"><span class="leg-dot" style="background:var(--purple)"></span>Carbon</span>
+        </div>
+      </div>
+      <canvas id="adoptionTrendChart" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- Feature Adoption Heatmap -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr">
+      <div><div class="cc-t">Feature Adoption Heatmap</div><div class="cc-s">Adoption % by account across all product modules — darker green = higher adoption</div></div>
+      <div class="cc-legend">
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(0,212,161,.7)"></span>&gt;75% Adopted</span>
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(245,166,35,.6)"></span>40–75% Partial</span>
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(255,69,96,.15);border:1px dashed rgba(255,69,96,.4)"></span>&lt;40% Low</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="hm-tbl" id="heatmapTable"></table>
+    </div>
+  </div>
+
+  <!-- Value Realization Index -->
+  <div class="g21">
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Value Realization Index (VRI)</div><div class="cc-s">Composite score: workflow automation + transaction volume + feature intensity</div></div></div>
+      <div id="vriList"></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">VRI Distribution</div><div class="cc-s">Accounts by value tier</div></div></div>
+      <canvas id="vriChart" height="180"></canvas>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-s)">High Value Realization</span><span style="color:var(--green);font-weight:700">6 accounts · $14.2M</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-s)">Moderate Value Realization</span><span style="color:var(--yellow);font-weight:700">5 accounts · $7.1M</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-s)">Low Value Realization</span><span style="color:var(--red);font-weight:700">4 accounts · $3.5M</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 4 — GROWTH & EXPANSION
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone4" class="zone">
+
+  <div class="sec-hdr">
+    <span class="sec-badge g">Zone 4</span>
+    <div><div class="sec-t">Growth & Expansion Intelligence</div><div class="sec-s">Where are the largest expansion opportunities?</div></div>
+  </div>
+
+  <div class="mg mg4" style="margin-bottom:14px">
+    <div class="mc g">
+      <div class="mc-lbl">Expansion Pipeline</div>
+      <div class="mc-val g">$3.8M</div>
+      <div class="mc-dlt up">▲ 12 accounts qualified</div>
+      <div class="mc-sub">Avg score: 71 / 100</div>
+    </div>
+    <div class="mc b">
+      <div class="mc-lbl">Near License Capacity</div>
+      <div class="mc-val b">4</div>
+      <div class="mc-dlt nt">≥85% utilisation</div>
+      <div class="mc-sub">$9.5M ARR · Upsell ready</div>
+    </div>
+    <div class="mc p">
+      <div class="mc-lbl">Whitespace Opportunity</div>
+      <div class="mc-val p">8</div>
+      <div class="mc-dlt nt">Unadopted modules</div>
+      <div class="mc-sub">Across 8 accounts</div>
+    </div>
+    <div class="mc y">
+      <div class="mc-lbl">Avg Expansion Score</div>
+      <div class="mc-val y">68</div>
+      <div class="mc-dlt up">▲ +8 vs Q4 2025</div>
+      <div class="mc-sub">100-point propensity index</div>
+    </div>
+  </div>
+
+  <div class="g21" style="margin-bottom:14px">
+    <!-- Expansion propensity list -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Expansion Propensity Rankings</div><div class="cc-s">Scored on adoption maturity, workflow activity, stakeholder engagement, industry fit</div></div></div>
+      <div id="expansionList"></div>
+    </div>
+    <!-- Expansion chart -->
+    <div class="cc">
+      <div class="cc-hdr"><div><div class="cc-t">Expansion Score vs ARR</div><div class="cc-s">Bubble size = estimated opportunity value</div></div></div>
+      <canvas id="expansionChart" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Product Whitespace Map -->
+  <div class="cc">
+    <div class="cc-hdr">
+      <div><div class="cc-t">Product Whitespace Map</div><div class="cc-s">Account vs Module adoption matrix — identify unadopted modules (whitespace) for cross-sell</div></div>
+      <div class="cc-legend">
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(0,212,161,.7)"></span>Fully Adopted</span>
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(77,158,255,.4)"></span>Partially Used</span>
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(245,166,35,.6)"></span>Trial / Early</span>
+        <span class="leg-it"><span class="leg-sq" style="background:rgba(255,69,96,.06);border:1px dashed rgba(255,69,96,.4)"></span>Whitespace</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="ws-tbl" id="whitespaceTable"></table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 5 — RENEWAL COMMAND CENTER
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone5" class="zone">
+
+  <div class="sec-hdr">
+    <span class="sec-badge y">Zone 5</span>
+    <div><div class="sec-t">Renewal Command Center</div><div class="sec-s">Track upcoming renewals with predictive intelligence & scenario modelling</div></div>
+  </div>
+
+  <div class="mg mg4" style="margin-bottom:14px">
+    <div class="mc r">
+      <div class="mc-lbl">Renewals — 30 days</div>
+      <div class="mc-val r">2</div>
+      <div class="mc-dlt dn">$4.7M at stake</div>
+      <div class="mc-sub">Avg renewal prob: 48%</div>
+    </div>
+    <div class="mc y">
+      <div class="mc-lbl">Renewals — 90 days</div>
+      <div class="mc-val y">3</div>
+      <div class="mc-dlt nt">$5.6M at stake</div>
+      <div class="mc-sub">Avg renewal prob: 61%</div>
+    </div>
+    <div class="mc b">
+      <div class="mc-lbl">Renewals — 180 days</div>
+      <div class="mc-val b">6</div>
+      <div class="mc-dlt nt">$10.1M at stake</div>
+      <div class="mc-sub">Avg renewal prob: 79%</div>
+    </div>
+    <div class="mc g">
+      <div class="mc-lbl">Expected Renewal ARR</div>
+      <div class="mc-val g">$22.8M</div>
+      <div class="mc-dlt up">92% retention forecast</div>
+      <div class="mc-sub">FY2026 base case</div>
+    </div>
+  </div>
+
+  <!-- Renewal Pipeline Buckets -->
+  <div class="ren-pipe" style="margin-bottom:14px" id="renewalPipeline"></div>
+
+  <!-- Renewal Forecast Chart -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr">
+      <div><div class="cc-t">Renewal Revenue Forecast — Scenario Modelling</div><div class="cc-s">Best case / Expected / Worst case ARR outcomes for next 12 months</div></div>
+      <div class="cc-legend">
+        <span class="leg-it"><span class="leg-dot" style="background:var(--green)"></span>Best Case</span>
+        <span class="leg-it"><span class="leg-dot" style="background:var(--blue)"></span>Expected</span>
+        <span class="leg-it"><span class="leg-dot" style="background:var(--red)"></span>Worst Case</span>
+      </div>
+    </div>
+    <canvas id="renewalForecastChart" height="160"></canvas>
+  </div>
+
+  <!-- Scenario Summary -->
+  <div class="sc-grid" style="margin-bottom:14px">
+    <div class="sc-card">
+      <div class="sc-lbl" style="color:var(--green)">🟢 Best Case Renewal</div>
+      <div class="sc-val" style="color:var(--green)">$26.4M</div>
+      <div class="sc-desc">All renewals close + 15% expansion uplift. NRR: 123%. Assumes all interventions succeed.</div>
+    </div>
+    <div class="sc-card">
+      <div class="sc-lbl" style="color:var(--blue)">🔵 Expected Outcome</div>
+      <div class="sc-val" style="color:var(--blue)">$24.8M</div>
+      <div class="sc-desc">2 high-risk accounts renew at reduced ARR. NRR: 116%. Current trajectory maintained.</div>
+    </div>
+    <div class="sc-card">
+      <div class="sc-lbl" style="color:var(--red)">🔴 Worst Case Churn</div>
+      <div class="sc-val" style="color:var(--red)">$20.7M</div>
+      <div class="sc-desc">Top 3 high-risk accounts fully churn. NRR: 97%. Requires immediate executive escalation.</div>
+    </div>
+  </div>
+
+  <!-- Customer Lifecycle Intelligence -->
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr"><div><div class="cc-t">Customer Lifecycle Intelligence</div><div class="cc-s">Account distribution across lifecycle stages — identify bottlenecks</div></div></div>
+    <div class="lc">
+      <div class="lc-stage">
+        <div class="lc-l">Onboarding</div>
+        <div class="lc-n">2</div>
+        <div class="lc-arr">$1.3M ARR</div>
+        <div class="lc-bar" style="background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+        <div style="font-size:9px;color:var(--yellow);margin-top:6px">⚠ Avg 68 days · Target 45</div>
+      </div>
+      <div class="lc-stage">
+        <div class="lc-l">Activation</div>
+        <div class="lc-n">1</div>
+        <div class="lc-arr">$0.6M ARR</div>
+        <div class="lc-bar" style="background:linear-gradient(90deg,var(--cyan),var(--green))"></div>
+        <div style="font-size:9px;color:var(--red);margin-top:6px">⚠ Stalled — low usage</div>
+      </div>
+      <div class="lc-stage">
+        <div class="lc-l">Adoption</div>
+        <div class="lc-n">3</div>
+        <div class="lc-arr">$4.1M ARR</div>
+        <div class="lc-bar" style="background:linear-gradient(90deg,var(--green),#00a07a)"></div>
+        <div style="font-size:9px;color:var(--text-m);margin-top:6px">On track</div>
+      </div>
+      <div class="lc-stage">
+        <div class="lc-l">Value Realisation</div>
+        <div class="lc-n">5</div>
+        <div class="lc-arr">$10.6M ARR</div>
+        <div class="lc-bar" style="background:linear-gradient(90deg,#00a07a,var(--green))"></div>
+        <div style="font-size:9px;color:var(--green);margin-top:6px">Healthy</div>
+      </div>
+      <div class="lc-stage">
+        <div class="lc-l">Renewal / Expand</div>
+        <div class="lc-n">4</div>
+        <div class="lc-arr">$8.2M ARR</div>
+        <div class="lc-bar" style="background:linear-gradient(90deg,var(--green),var(--blue))"></div>
+        <div style="font-size:9px;color:var(--green);margin-top:6px">3 expanding</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.18);border-radius:6px;font-size:11px;color:var(--yellow)">
+      ⚠ Lifecycle bottleneck detected: Activation → Adoption conversion rate dropped to 61% (target: 75%). 1 account stalled at Activation stage for 42 days. Recommend: launch targeted onboarding intervention.
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZONE 6 — EXECUTIVE ACTION CENTER
+══════════════════════════════════════════════════════════════════ -->
+<div id="zone6" class="zone">
+
+  <div class="sec-hdr">
+    <span class="sec-badge r">Action Center</span>
+    <div><div class="sec-t">Executive Action Center</div><div class="sec-s">Accounts requiring immediate leadership attention — prioritised by revenue impact & urgency</div></div>
+    <div class="sec-acts">
+      <button class="btn btn-o" style="font-size:11px">Assign to CSM</button>
+      <button class="btn" style="font-size:11px">⬇ Export Action List</button>
+    </div>
+  </div>
+
+  <!-- Summary KPIs -->
+  <div class="mg mg4" style="margin-bottom:18px">
+    <div class="mc r">
+      <div class="mc-lbl">Critical Actions</div>
+      <div class="mc-val r">5</div>
+      <div class="mc-dlt dn">Require this week</div>
+      <div class="mc-sub">$6.7M ARR exposure</div>
+    </div>
+    <div class="mc y">
+      <div class="mc-lbl">Exec Meetings Needed</div>
+      <div class="mc-val y">3</div>
+      <div class="mc-dlt nt">No exec sponsor in 60d+</div>
+      <div class="mc-sub">Nexus, Apex, Vertex</div>
+    </div>
+    <div class="mc b">
+      <div class="mc-lbl">Adoption Workshops</div>
+      <div class="mc-val b">2</div>
+      <div class="mc-dlt nt">Usage below threshold</div>
+      <div class="mc-sub">CloudBase, DataStream</div>
+    </div>
+    <div class="mc g">
+      <div class="mc-lbl">Actions Completed</div>
+      <div class="mc-val g">12</div>
+      <div class="mc-dlt up">▲ This quarter</div>
+      <div class="mc-sub">71% completion rate</div>
+    </div>
+  </div>
+
+  <!-- Priority Actions -->
+  <div class="sep"><div class="sep-line"></div><div class="sep-t">Critical — Immediate Action Required (This Week)</div><div class="sep-line"></div></div>
+
+  <div class="ac urg">
+    <div class="ac-ico r">🔥</div>
+    <div class="ac-content">
+      <div class="ac-acct">Nexus Financial — $2.8M ARR</div>
+      <div class="ac-trig">Risk Score: 78% (HIGH) · Renewal in 87 days · Executive sponsor departed Jan 2026 · Product usage declined 41% in 60 days · 2 open P1 support escalations unresolved for 18 days</div>
+      <div class="ac-rec">Schedule CRO-level executive alignment meeting this week · Assign interim executive sponsor · Expedite resolution of open escalations · Deploy dedicated success engineer</div>
+      <div class="ac-meta">
+        <span class="tag r">High Risk</span>
+        <span class="tag r">Renewal: 87d</span>
+        <span class="tag y">Usage: -41%</span>
+        <span class="tag r">No Exec Sponsor</span>
+        <span class="tag r">P1 Escalation</span>
+        <span class="tag b">CSM: Sarah Chen</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr">$2.8M</div>
+      <div class="ac-days">87 days to renewal</div>
+      <div style="margin-top:8px"><span class="rb high">● 78% Risk</span></div>
+    </div>
+  </div>
+
+  <div class="ac urg">
+    <div class="ac-ico r">⚡</div>
+    <div class="ac-content">
+      <div class="ac-acct">Apex Manufacturing — $1.9M ARR</div>
+      <div class="ac-trig">Risk Score: 71% (HIGH) · Renewal in 63 days · Only 1 of 5 key stakeholders engaged · Trading module adoption at 22% (vs 70% benchmark) · Competitor evaluation signals detected in email sentiment analysis</div>
+      <div class="ac-rec">Initiate executive alignment call · Launch intensive Trading module training programme · Deploy competitive retention playbook · Escalate to VP Customer Success</div>
+      <div class="ac-meta">
+        <span class="tag r">High Risk</span>
+        <span class="tag r">Renewal: 63d</span>
+        <span class="tag y">Low Adoption</span>
+        <span class="tag r">Competitor Eval</span>
+        <span class="tag b">CSM: Marcus Webb</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr">$1.9M</div>
+      <div class="ac-days">63 days to renewal</div>
+      <div style="margin-top:8px"><span class="rb high">● 71% Risk</span></div>
+    </div>
+  </div>
+
+  <div class="ac urg">
+    <div class="ac-ico r">⚠️</div>
+    <div class="ac-content">
+      <div class="ac-acct">Vertex Analytics — $1.4M ARR</div>
+      <div class="ac-trig">Risk Score: 66% (HIGH) · Renewal in 102 days · 3 unresolved support tickets aged 14+ days · NPS dropped from 52 to 28 last survey · Carbon Analytics module completely unused despite being contracted</div>
+      <div class="ac-rec">Priority support ticket resolution SLA review · Carbon Analytics onboarding workshop · Executive NPS recovery call · Review pricing strategy — potential right-size opportunity</div>
+      <div class="ac-meta">
+        <span class="tag r">High Risk</span>
+        <span class="tag r">Renewal: 102d</span>
+        <span class="tag r">NPS: 28</span>
+        <span class="tag y">Module Unused</span>
+        <span class="tag b">CSM: Priya Patel</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr">$1.4M</div>
+      <div class="ac-days">102 days to renewal</div>
+      <div style="margin-top:8px"><span class="rb high">● 66% Risk</span></div>
+    </div>
+  </div>
+
+  <div class="sep"><div class="sep-line"></div><div class="sep-t">Warning — Action Required (This Month)</div><div class="sep-line"></div></div>
+
+  <div class="ac wrn">
+    <div class="ac-ico y">📉</div>
+    <div class="ac-content">
+      <div class="ac-acct">CloudBase Systems — $0.8M ARR</div>
+      <div class="ac-trig">Risk Score: 52% (MODERATE) · Renewal in 145 days · Active user rate dropped from 78% to 55% in last 30 days · No meeting held in 47 days · Market Intelligence module not accessed in 60 days</div>
+      <div class="ac-rec">Re-engagement call with key champion · Usage review workshop · Market Intelligence feature demo and training session</div>
+      <div class="ac-meta">
+        <span class="tag y">Moderate Risk</span>
+        <span class="tag y">Usage Decline</span>
+        <span class="tag y">No Meeting: 47d</span>
+        <span class="tag b">CSM: Jordan Kim</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr">$0.8M</div>
+      <div class="ac-days">145 days to renewal</div>
+      <div style="margin-top:8px"><span class="rb mod">● 52% Risk</span></div>
+    </div>
+  </div>
+
+  <div class="ac wrn">
+    <div class="ac-ico y">🎯</div>
+    <div class="ac-content">
+      <div class="ac-acct">GlobalTrade GmbH — $2.1M ARR</div>
+      <div class="ac-trig">Risk Score: 45% (MODERATE) · Renewal in 178 days · Carbon Analytics adopted at 0% despite contracting in Dec 2025 · Executive sponsor engaged but no QBR in 90 days · Potential for $400K expansion if Carbon module activated</div>
+      <div class="ac-rec">Urgent Carbon Analytics activation programme · Schedule Q1 QBR within 2 weeks · Introduce Carbon Regulatory team for value consultation · Identify internal champion for Carbon module</div>
+      <div class="ac-meta">
+        <span class="tag y">Moderate Risk</span>
+        <span class="tag p">Expansion Signal</span>
+        <span class="tag y">Carbon: 0% Used</span>
+        <span class="tag b">CSM: Priya Patel</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr">$2.1M</div>
+      <div class="ac-days">178 days to renewal</div>
+      <div style="margin-top:8px"><span class="rb mod">● 45% Risk</span></div>
+    </div>
+  </div>
+
+  <div class="sep"><div class="sep-line"></div><div class="sep-t">Opportunity — Expansion Actions</div><div class="sep-line"></div></div>
+
+  <div class="ac inf">
+    <div class="ac-ico b">🚀</div>
+    <div class="ac-content">
+      <div class="ac-acct">Quantum Energy — $3.2M ARR · Expansion Candidate</div>
+      <div class="ac-trig">Expansion Score: 91/100 · Feature adoption at 84% · At 92% license capacity · Carbon Analytics at 85% — ready for Enterprise tier upgrade · Industry regulatory tailwinds creating budget urgency</div>
+      <div class="ac-rec">Present Enterprise tier upgrade proposal · Introduce Carbon Regulatory premium package · Target $600K–$900K expansion · Coordinate with AE for commercial discussion this month</div>
+      <div class="ac-meta">
+        <span class="tag g">Expansion Ready</span>
+        <span class="tag g">Adoption: 84%</span>
+        <span class="tag b">Capacity: 92%</span>
+        <span class="tag g">NPS: 72</span>
+        <span class="tag b">CSM: Marcus Webb</span>
+      </div>
+    </div>
+    <div class="ac-side">
+      <div class="ac-arr" style="color:var(--green)">+$750K</div>
+      <div class="ac-days" style="color:var(--green)">Expansion opp.</div>
+      <div style="margin-top:8px"><span class="rb low">● 18% Risk</span></div>
+    </div>
+  </div>
+
+</div><!-- end zone6 -->
+
+</div><!-- end main -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+// ── DATA ────────────────────────────────────────────────────────────
+const accounts = [
+  { name:'Nexus Financial',      seg:'High touch',  region:'AMER',  csm:'Sarah Chen',  arr:2800000, risk:78, rc:'high', renewal:87,  adopt:34, nps:28, contracts:45, trading:22, market:15, carbon:8,  meetDays:61, vri:28,  products:['Contracts','Trade','Futures']             },
+  { name:'Apex Manufacturing',   seg:'High touch',  region:'UK/EU', csm:'Marcus Webb', arr:1900000, risk:71, rc:'high', renewal:63,  adopt:41, nps:32, contracts:67, trading:22, market:12, carbon:0,  meetDays:45, vri:34,  products:['Contracts','Recap Manager']               },
+  { name:'Vertex Analytics',     seg:'Low touch',   region:'AMER',  csm:'Priya Patel', arr:1400000, risk:66, rc:'high', renewal:102, adopt:38, nps:28, contracts:55, trading:30, market:20, carbon:5,  meetDays:38, vri:31,  products:['Net','Commodity Analytics']               },
+  { name:'CloudBase Systems',    seg:'Low touch',   region:'APAC',  csm:'Jordan Kim',  arr:800000,  risk:52, rc:'mod',  renewal:145, adopt:55, nps:52, contracts:72, trading:60, market:35, carbon:10, meetDays:47, vri:52,  products:['Trade','Calc']                            },
+  { name:'DataStream Corp',      seg:'Low touch',   region:'MEA',   csm:'Sarah Chen',  arr:600000,  risk:48, rc:'mod',  renewal:167, adopt:62, nps:48, contracts:80, trading:55, market:40, carbon:0,  meetDays:34, vri:58,  products:['Marine Analytics','Carbon']               },
+  { name:'GlobalTrade GmbH',     seg:'High touch',  region:'UK/EU', csm:'Priya Patel', arr:2100000, risk:45, rc:'mod',  renewal:178, adopt:60, nps:55, contracts:78, trading:65, market:48, carbon:0,  meetDays:28, vri:56,  products:['Trade','Futures','Commodity Analytics']   },
+  { name:'BlueStar Trading',     seg:'Tech touch',  region:'APAC',  csm:'Marcus Webb', arr:500000,  risk:55, rc:'mod',  renewal:130, adopt:50, nps:42, contracts:64, trading:48, market:28, carbon:0,  meetDays:52, vri:46,  products:['Trade','Carbon']                          },
+  { name:'NovaTech Solutions',   seg:'Low touch',   region:'AMER',  csm:'Marcus Webb', arr:1200000, risk:32, rc:'low',  renewal:220, adopt:68, nps:60, contracts:82, trading:68, market:50, carbon:15, meetDays:14, vri:66,  products:['Net','Calc','Contracts']                  },
+  { name:'Pacific Commodities',  seg:'High touch',  region:'APAC',  csm:'Jordan Kim',  arr:1700000, risk:35, rc:'low',  renewal:265, adopt:73, nps:67, contracts:87, trading:80, market:60, carbon:42, meetDays:18, vri:71,  products:['Commodity Analytics','Carbon','Trade']    },
+  { name:'CoreLogic Partners',   seg:'Low touch',   region:'CH',    csm:'Jordan Kim',  arr:1000000, risk:30, rc:'low',  renewal:275, adopt:70, nps:63, contracts:83, trading:72, market:52, carbon:18, meetDays:21, vri:68,  products:['Contracts','Recap Manager']               },
+  { name:'SkyBridge Networks',   seg:'High touch',  region:'NOR',   csm:'Jordan Kim',  arr:1800000, risk:25, rc:'low',  renewal:248, adopt:76, nps:65, contracts:85, trading:72, market:65, carbon:30, meetDays:12, vri:74,  products:['Marine Analytics','Net']                  },
+  { name:'PrimeCo Industries',   seg:'Low touch',   region:'CH',    csm:'Sarah Chen',  arr:1600000, risk:28, rc:'low',  renewal:198, adopt:71, nps:70, contracts:90, trading:78, market:55, carbon:20, meetDays:15, vri:72,  products:['Carbon','Commodity Analytics']            },
+  { name:'Meridian Capital',     seg:'High touch',  region:'MEA',   csm:'Sarah Chen',  arr:1800000, risk:20, rc:'low',  renewal:340, adopt:82, nps:75, contracts:92, trading:85, market:78, carbon:60, meetDays:8,  vri:83,  products:['Trade','Futures','Carbon']                },
+  { name:'TechFlow Inc',         seg:'High touch',  region:'AMER',  csm:'Priya Patel', arr:2400000, risk:22, rc:'low',  renewal:315, adopt:79, nps:68, contracts:88, trading:82, market:70, carbon:45, meetDays:10, vri:78,  products:['Calc','Net','Contracts']                  },
+  { name:'Quantum Energy',       seg:'High touch',  region:'NOR',   csm:'Marcus Webb', arr:3200000, risk:18, rc:'low',  renewal:290, adopt:84, nps:72, contracts:92, trading:88, market:78, carbon:85, meetDays:7,  vri:88,  products:['Carbon','Futures','Commodity Analytics']  },
+];
+
+const closedLost = [
+  { account:'Nexus Financial',     product:'Carbon',              opp:'Carbon Analytics Expansion',        dateLost:'2024-08-15', reason:'Budget constraints',    potARR:180000 },
+  { account:'Nexus Financial',     product:'Marine Analytics',    opp:'Marine Analytics Add-on',           dateLost:'2025-01-22', reason:'Competitor selected',   potARR:120000 },
+  { account:'Apex Manufacturing',  product:'Trade',               opp:'Trade Platform Upsell',             dateLost:'2024-11-03', reason:'No exec sponsor',       potARR:240000 },
+  { account:'Vertex Analytics',    product:'Contracts',           opp:'Contracts Module Expansion',        dateLost:'2024-09-18', reason:'Pricing objection',     potARR:200000 },
+  { account:'Vertex Analytics',    product:'Futures',             opp:'Futures Trading Add-on',            dateLost:'2025-02-10', reason:'Timeline deferred',     potARR:150000 },
+  { account:'CloudBase Systems',   product:'Futures',             opp:'Futures Module License',            dateLost:'2024-10-07', reason:'Competitor selected',   potARR:90000  },
+  { account:'DataStream Corp',     product:'Commodity Analytics', opp:'Commodity Analytics Pilot',         dateLost:'2024-12-14', reason:'Budget freeze',         potARR:110000 },
+  { account:'GlobalTrade GmbH',    product:'Recap Manager',       opp:'Recap Manager Rollout',             dateLost:'2024-07-29', reason:'Integration concerns',  potARR:180000 },
+  { account:'GlobalTrade GmbH',    product:'Carbon',              opp:'Carbon Module',                     dateLost:'2025-01-08', reason:'Low prioritisation',    potARR:130000 },
+  { account:'BlueStar Trading',    product:'Net',                 opp:'Net Freight Rate Feed',             dateLost:'2024-09-05', reason:'Pricing objection',     potARR:60000  },
+  { account:'NovaTech Solutions',  product:'Futures',             opp:'Futures Analytics Tier',            dateLost:'2024-11-20', reason:'No budget this FY',     potARR:140000 },
+  { account:'Pacific Commodities', product:'Recap Manager',       opp:'Recap Manager Expansion',           dateLost:'2024-08-28', reason:'Timeline deferred',     potARR:160000 },
+  { account:'CoreLogic Partners',  product:'Marine Analytics',    opp:'Marine Analytics Pilot',            dateLost:'2025-02-03', reason:'Competitive loss',      potARR:95000  },
+  { account:'SkyBridge Networks',  product:'Commodity Analytics', opp:'Commodity Analytics Bundle',        dateLost:'2024-10-15', reason:'Stakeholder change',    potARR:210000 },
+  { account:'PrimeCo Industries',  product:'Trade',               opp:'Trade Platform Expansion',          dateLost:'2024-12-01', reason:'Budget reallocation',   potARR:175000 },
+  { account:'Meridian Capital',    product:'Recap Manager',       opp:'Recap Manager License',             dateLost:'2024-06-18', reason:'Timing not right',      potARR:220000 },
+  { account:'TechFlow Inc',        product:'Marine Analytics',    opp:'Marine Analytics Add-on',           dateLost:'2025-01-15', reason:'Stakeholder change',    potARR:195000 },
+  { account:'Quantum Energy',      product:'Marine Analytics',    opp:'Marine Analytics Platform',         dateLost:'2024-11-08', reason:'Internal resourcing',   potARR:280000 },
+];
+
+const COLORS = { g: '#00a87e', y: '#d4840a', r: '#e02040', b: '#2563eb', p: '#7c3aed', m: '#94a3b8', s: '#475569' };
+const chartDefaults = {
+  color: COLORS.s,
+  font: { family: "'Inter', sans-serif" },
+};
+Chart.defaults.color = COLORS.s;
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+
+const gridOpts = {
+  color: 'rgba(0,0,0,0.07)',
+  drawBorder: false
+};
+
+const PROD_COLORS = {
+  'Trade':               '#2563eb',
+  'Net':                 '#00a87e',
+  'Calc':                '#06b6d4',
+  'Futures':             '#f59e0b',
+  'Carbon':              '#10b981',
+  'Contracts':           '#7c3aed',
+  'Recap Manager':       '#ec4899',
+  'Marine Analytics':    '#0891b2',
+  'Commodity Analytics': '#d97706',
+};
+const ALL_PRODUCTS = ['Trade','Net','Calc','Futures','Carbon','Contracts','Recap Manager','Marine Analytics','Commodity Analytics'];
+const RISK_BANDS   = ['0–10%','11–20%','21–30%','31–40%','41–50%','51–60%','61–70%','71–80%','81–90%','91–100%'];
+function getRiskBand(r) { return Math.min(9, Math.floor(r / 10)); }
+
+let riskDistChartInst = null;
+
+function buildRiskDistChart() {
+  const canvas = document.getElementById('riskDistChart');
+  if (!canvas) return;
+  if (riskDistChartInst) { riskDistChartInst.destroy(); riskDistChartInst = null; }
+  const ctx     = canvas.getContext('2d');
+  const region  = (document.getElementById('z2Region')  || {}).value || '';
+  const segment = (document.getElementById('z2Segment') || {}).value || '';
+  const product = (document.getElementById('z2Product') || {}).value || '';
+  const sub     = document.getElementById('riskDistSub');
+
+  // Base filter: region + segment only (product handled separately for breakdown view)
+  const base = accounts.filter(a => {
+    if (region  && a.region !== region)  return false;
+    if (segment && a.seg    !== segment) return false;
+    return true;
+  });
+
+  // Inline plugin: draws ARR label above each bar (bandARR captured via closure)
+  function makeArrPlugin(bandARR) {
+    return {
+      id: 'arrLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx: c, scales: { y } } = chart;
+        // Sum visible dataset counts per band to find stack top
+        const totals = new Array(10).fill(0);
+        chart.data.datasets.forEach((ds, di) => {
+          if (chart.getDatasetMeta(di).hidden) return;
+          ds.data.forEach((v, i) => { totals[i] += (v || 0); });
+        });
+        const meta0 = chart.getDatasetMeta(0);
+        meta0.data.forEach((bar, i) => {
+          if (!bandARR[i]) return;
+          const yPx = y.getPixelForValue(totals[i]);
+          c.save();
+          c.textAlign = 'center';
+          c.textBaseline = 'bottom';
+          c.fillStyle = '#475569';
+          c.font = '600 9px Inter, sans-serif';
+          c.fillText(fmt(bandARR[i]), bar.x, yPx - 3);
+          c.restore();
+        });
+      }
+    };
+  }
+
+  if (!product) {
+    // ── Stacked product breakdown ──────────────────────────────────────
+    if (sub) sub.textContent = 'All products · stacked by product · ARR shown above each band';
+    const bandARR = new Array(10).fill(0);
+    base.forEach(a => { bandARR[getRiskBand(a.risk)] += a.arr; });
+
+    const datasets = ALL_PRODUCTS.map(prod => {
+      const bands = new Array(10).fill(0);
+      base.forEach(a => { if ((a.products || []).includes(prod)) bands[getRiskBand(a.risk)]++; });
+      return {
+        label: prod,
+        data: bands,
+        backgroundColor: PROD_COLORS[prod] + 'cc',
+        borderColor: PROD_COLORS[prod],
+        borderWidth: 0,
+        stack: 'stack',
+      };
+    }).filter(ds => ds.data.some(v => v > 0));
+
+    riskDistChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: RISK_BANDS, datasets },
+      options: {
+        responsive: true,
+        layout: { padding: { top: 18 } },
+        plugins: {
+          legend: { display: true, position: 'top', labels: { color: COLORS.s, boxWidth: 10, font: { size: 9 }, padding: 6 } },
+          tooltip: {
+            mode: 'index',
+            callbacks: {
+              title: items => 'Risk Band: ' + items[0].label + ' · Total ARR: ' + fmt(bandARR[RISK_BANDS.indexOf(items[0].label)]),
+              label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.raw + (ctx.raw === 1 ? ' acct' : ' accts'),
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: COLORS.s, font: { size: 9 } }, stacked: true },
+          y: { grid: gridOpts, ticks: { color: COLORS.s, stepSize: 1 }, stacked: true }
+        }
+      },
+      plugins: [makeArrPlugin(bandARR)]
+    });
+  } else {
+    // ── Single product distribution ────────────────────────────────────
+    if (sub) sub.textContent = product + ' accounts · by probability band · ARR shown above each bar';
+    const prodAccts = base.filter(a => (a.products || []).includes(product));
+    const bands = new Array(10).fill(0);
+    const bandARR = new Array(10).fill(0);
+    prodAccts.forEach(a => {
+      const b = getRiskBand(a.risk);
+      bands[b]++;
+      bandARR[b] += a.arr;
+    });
+
+    riskDistChartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: RISK_BANDS,
+        datasets: [{
+          label: product,
+          data: bands,
+          backgroundColor: [
+            COLORS.g+'bb',COLORS.g+'bb',COLORS.g+'bb',COLORS.g+'99',
+            COLORS.y+'99',COLORS.y+'bb',COLORS.r+'88',COLORS.r+'bb',COLORS.r+'dd',COLORS.r+'dd'
+          ],
+          borderRadius: 3,
+        }]
+      },
+      options: {
+        layout: { padding: { top: 18 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.raw + (ctx.raw === 1 ? ' account' : ' accounts') + ' · ' + fmt(bandARR[ctx.dataIndex])
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: COLORS.s, font: { size: 9 } } },
+          y: { grid: gridOpts, ticks: { color: COLORS.s, stepSize: 1 } }
+        }
+      },
+      plugins: [makeArrPlugin(bandARR)]
+    });
+  }
+}
+
+const initd = new Set();
+
+// ── NAVIGATION ──────────────────────────────────────────────────────
+function nav(el, zoneId) {
+  document.querySelectorAll('.nav-it').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  tab(null, zoneId);
+  // sync tabs
+  const tabEls = document.querySelectorAll('.tab-it');
+  const zoneIdx = ['zone1','zone2','zone3','zone4','zone5','zone6'].indexOf(zoneId);
+  tabEls.forEach((t,i) => t.classList.toggle('active', i === zoneIdx));
+}
+
+function tab(el, zoneId) {
+  if (el) {
+    document.querySelectorAll('.tab-it').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  document.querySelectorAll('.zone').forEach(z => z.classList.remove('active'));
+  document.getElementById(zoneId).classList.add('active');
+  if (!initd.has(zoneId)) {
+    initd.add(zoneId);
+    const fn = zoneInits[zoneId];
+    if (fn) setTimeout(fn, 50);
+  }
+}
+
+function applyFilter() {
+  // Sync global topbar filters → zone 2 dropdowns and re-render
+  const gRegion  = document.getElementById('fltRegion');
+  const gSegment = document.getElementById('fltSegment');
+  const gProduct = document.getElementById('fltProduct');
+  const z2r = document.getElementById('z2Region');
+  const z2s = document.getElementById('z2Segment');
+  const z2p = document.getElementById('z2Product');
+  if (z2r && gRegion)  z2r.value = gRegion.value;
+  if (z2s && gSegment) z2s.value = gSegment.value;
+  if (z2p && gProduct) z2p.value = gProduct.value;
+  renderRiskTable();
+}
+
+function renderRiskTable() {
+  const tbody = document.getElementById('riskTableBody');
+  if (!tbody) return;
+  const region  = (document.getElementById('z2Region')  || {}).value  || '';
+  const segment = (document.getElementById('z2Segment') || {}).value  || '';
+  const product = (document.getElementById('z2Product') || {}).value  || '';
+  const filtered = accounts.filter(a => {
+    if (region  && a.region !== region)  return false;
+    if (segment && a.seg    !== segment) return false;
+    if (product && !(a.products || []).includes(product)) return false;
+    return true;
+  });
+  const sorted = [...filtered].sort((a,b) => b.risk - a.risk);
+  // Update filter count badge
+  const badge = document.getElementById('z2FilterCount');
+  if (badge) {
+    const active = [region, segment, product].filter(Boolean);
+    badge.textContent = active.length ? `Showing ${sorted.length} of ${accounts.length} accounts · Filters: ${active.join(' · ')}` : `Showing all ${accounts.length} accounts`;
+  }
+  tbody.innerHTML = sorted.map(a => {
+    const rc = a.rc;
+    const trend = a.adopt >= 65 ? '<span style="color:var(--green)">▲ Stable</span>' :
+                  a.adopt >= 45 ? '<span style="color:var(--yellow)">— Flat</span>' :
+                                  '<span style="color:var(--red)">▼ Declining</span>';
+    const dayColor = a.meetDays > 45 ? 'color:var(--red)' : a.meetDays > 21 ? 'color:var(--yellow)' : 'color:var(--green)';
+    const churnVal = Math.round(a.arr * a.risk / 100);
+    const churnColor = rc==='high' ? 'color:var(--red)' : rc==='mod' ? 'color:var(--yellow)' : 'color:var(--green)';
+    const healthColor = a.vri >= 70 ? 'color:var(--green)' : a.vri >= 50 ? 'color:var(--yellow)' : 'color:var(--red)';
+    const segColor = a.seg==='High touch' ? 'color:var(--blue)' : a.seg==='Tech touch' ? 'color:var(--purple)' : 'color:var(--text-s)';
+    const prodTags = (a.products||[]).map((p,i) => `<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:600;margin:1px;background:${i===0?'rgba(37,99,235,0.12)':'rgba(0,0,0,0.05)'};color:${i===0?'var(--blue)':'var(--text-s)'}">${p}</span>`).join('');
+    return `<tr>
+      <td><div class="tbl-a">${a.name}</div></td>
+      <td style="font-weight:600;font-size:11px;color:var(--text-s)">${a.region}</td>
+      <td style="font-size:11px;font-weight:600;${segColor}">${a.seg}</td>
+      <td style="white-space:normal;min-width:140px">${prodTags}</td>
+      <td style="color:var(--text-s)">${a.csm}</td>
+      <td style="font-weight:700;color:var(--blue)">${fmt(a.arr)}</td>
+      <td style="font-weight:700;${churnColor}">${fmt(churnVal)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:800;font-size:13px;${healthColor}">${a.vri}</span>
+          <div class="pbar" style="width:60px;flex-shrink:0"><div class="pbfill ${a.vri>=70?'g':a.vri>=50?'y':'r'}" style="width:${a.vri}%"></div></div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="rc ${rc}">${a.risk}%</div>
+          <div style="flex:1">
+            <div class="pbar" style="width:80px"><div class="pbfill ${rc==='high'?'r':rc==='mod'?'y':'g'}" style="width:${a.risk}%"></div></div>
+          </div>
+        </div>
+      </td>
+      <td><span class="rb ${rc==='high'?'high':rc==='mod'?'mod':'low'}">● ${rc==='high'?'High Risk':rc==='mod'?'Moderate':'Low Risk'}</span></td>
+      <td style="${a.renewal<90?'color:var(--red)':a.renewal<180?'color:var(--yellow)':'color:var(--green)'}">${a.renewal}d</td>
+      <td>${trend}</td>
+      <td style="${dayColor}">${a.meetDays}d ago</td>
+      <td style="font-size:11px;color:var(--text-s);max-width:200px">${getIssue(a)}</td>
+      <td style="font-size:11px;color:var(--blue);font-weight:600;max-width:220px">${getNextStep(a)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="15" style="text-align:center;color:var(--text-s);padding:24px">No accounts match the selected filters.</td></tr>`;
+  // Rebuild distribution chart and closed lost table to reflect current filter state
+  buildRiskDistChart();
+  renderClosedLostTable();
+}
+
+function renderClosedLostTable() {
+  const tbody = document.getElementById('closedLostBody');
+  if (!tbody) return;
+  const region  = (document.getElementById('z2Region')  || {}).value || '';
+  const segment = (document.getElementById('z2Segment') || {}).value || '';
+  const product = (document.getElementById('z2Product') || {}).value || '';
+  const today   = new Date();
+
+  // Join closedLost entries with their account's region/segment/risk for filtering
+  const accountMap = {};
+  accounts.forEach(a => { accountMap[a.name] = a; });
+
+  const filtered = closedLost.filter(cl => {
+    const a = accountMap[cl.account];
+    if (!a) return false;
+    if (region  && a.region !== region)  return false;
+    if (segment && a.seg    !== segment) return false;
+    if (product && cl.product !== product) return false;
+    return true;
+  });
+
+  // Sort: high-risk accounts first, then by days since lost descending
+  filtered.sort((x, y) => {
+    const ax = accountMap[x.account], ay = accountMap[y.account];
+    const rOrder = { high:0, mod:1, low:2 };
+    if (rOrder[ax.rc] !== rOrder[ay.rc]) return rOrder[ax.rc] - rOrder[ay.rc];
+    return new Date(y.dateLost) - new Date(x.dateLost); // more recent first within same risk tier
+  });
+
+  const sub = document.getElementById('closedLostSub');
+  if (sub) sub.textContent = `${filtered.length} closed lost opportunit${filtered.length === 1 ? 'y' : 'ies'} · sorted by account risk then recency · total potential ARR: ${fmt(filtered.reduce((s,cl)=>s+cl.potARR,0))}`;
+
+  tbody.innerHTML = filtered.map(cl => {
+    const a = accountMap[cl.account];
+    const daysSince = Math.floor((today - new Date(cl.dateLost)) / 86400000);
+    const dateStr   = new Date(cl.dateLost).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const daysColor = daysSince > 365 ? 'color:var(--red)' : daysSince > 180 ? 'color:var(--yellow)' : 'color:var(--text-s)';
+
+    // Revisit priority: high-risk account = High; mod risk or >6mo = Medium; else Low
+    let priority, priColor, priClass;
+    if (a.rc === 'high') {
+      priority = 'High'; priColor = 'color:var(--red)'; priClass = 'high';
+    } else if (a.rc === 'mod' || daysSince > 180) {
+      priority = 'Medium'; priColor = 'color:var(--yellow)'; priClass = 'mod';
+    } else {
+      priority = 'Low'; priColor = 'color:var(--green)'; priClass = 'low';
+    }
+
+    const prodColor = PROD_COLORS[cl.product] || COLORS.b;
+    return `<tr>
+      <td><div class="tbl-a">${cl.account}</div></td>
+      <td style="font-size:11px;font-weight:600;color:var(--text-s)">${a.region}</td>
+      <td style="font-size:11px;font-weight:600;color:var(--text-s)">${a.seg}</td>
+      <td><span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;background:${prodColor}18;color:${prodColor}">${cl.product}</span></td>
+      <td style="font-size:11px;color:var(--text-s)">${cl.opp}</td>
+      <td style="font-size:11px;color:var(--text-s);white-space:nowrap">${dateStr}</td>
+      <td style="font-size:11px;font-weight:700;${daysColor}">${daysSince}d</td>
+      <td style="font-size:11px;color:var(--text-s)">${cl.reason}</td>
+      <td style="font-weight:700;color:var(--blue)">${fmt(cl.potARR)}</td>
+      <td><span class="rb ${priClass === 'high' ? 'high' : priClass === 'mod' ? 'mod' : 'low'}">● ${a.rc === 'high' ? 'High Risk' : a.rc === 'mod' ? 'Moderate' : 'Low Risk'}</span></td>
+      <td><span style="font-size:11px;font-weight:700;${priColor}">▲ ${priority}</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center;color:var(--text-s);padding:20px">No closed lost opportunities match the selected filters.</td></tr>`;
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────
+function fmt(v) {
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + v;
+}
+
+function riskColor(rc) {
+  return rc === 'high' ? COLORS.r : rc === 'mod' ? COLORS.y : COLORS.g;
+}
+
+function getIssue(a) {
+  if (a.rc === 'high') {
+    if (a.adopt < 38) return 'Severe adoption decline; executive escalation pending';
+    if (a.renewal < 90) return 'Renewal imminent with unresolved multi-signal risk';
+    return 'Low engagement & declining usage across core modules';
+  } else if (a.rc === 'mod') {
+    if (a.meetDays > 45) return 'Stakeholder engagement gap; usage plateauing';
+    return 'Adoption stall; support sentiment softening';
+  } else {
+    if (a.adopt > 78) return 'None — strong adoption and engagement';
+    return 'Minor usage variance; monitor at next QBR';
+  }
+}
+
+function getNextStep(a) {
+  if (a.rc === 'high') {
+    if (a.renewal < 90) return 'Exec alignment call + renewal strategy session this week';
+    return 'Schedule exec sponsor meeting; deploy CSM intervention plan';
+  } else if (a.rc === 'mod') {
+    if (a.meetDays > 40) return 'Re-engage stakeholders; book mid-cycle health review';
+    return 'Present value realization report; address adoption blockers';
+  } else {
+    if (a.adopt > 75) return 'Initiate expansion discovery conversation';
+    return 'Quarterly business review; reinforce product ROI';
+  }
+}
+
+function heatColor(pct) {
+  if (pct >= 75) return { bg: `rgba(0,168,126,${0.1 + pct/200})`, color: '#00a87e' };
+  if (pct >= 40) return { bg: `rgba(212,132,10,${0.08 + pct/400})`, color: '#d4840a' };
+  return { bg: 'rgba(224,32,64,0.07)', color: '#94a3b8', border: '1px dashed rgba(224,32,64,.35)' };
+}
+
+// ── ZONE 1 CHARTS ────────────────────────────────────────────────────
+function initZone1() {
+  // Waterfall
+  const wfCtx = document.getElementById('waterfallChart').getContext('2d');
+  new Chart(wfCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Starting ARR', 'Expansion', 'Contraction', 'Churn', 'Ending ARR'],
+      datasets: [{
+        label: 'ARR',
+        data: [[0,21.4],[21.4,25.6],[25.2,25.6],[24.8,25.2],[0,24.8]],
+        backgroundColor: [COLORS.b+'cc', COLORS.g+'cc', COLORS.r+'cc', COLORS.y+'cc', COLORS.b+'cc'],
+        borderColor:     [COLORS.b, COLORS.g, COLORS.r, COLORS.y, COLORS.b],
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = ctx.raw;
+              const val = Math.abs(d[1] - d[0]).toFixed(1);
+              const labels = ['$21.4M', '+$4.2M', '-$0.4M', '-$0.4M', '$24.8M'];
+              return labels[ctx.dataIndex];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: COLORS.s } },
+        y: {
+          grid: gridOpts,
+          ticks: { callback: v => '$' + v + 'M', color: COLORS.s },
+          min: 0, max: 28
+        }
+      }
+    }
+  });
+
+  // Portfolio Doughnut
+  const portCtx = document.getElementById('portfolioChart').getContext('2d');
+  new Chart(portCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Healthy Revenue', 'Watchlist Revenue', 'High Risk Revenue'],
+      datasets: [{
+        data: [17.6, 4.1, 3.1],
+        backgroundColor: [COLORS.g+'cc', COLORS.y+'cc', COLORS.r+'cc'],
+        borderColor: ['#ffffff'],
+        borderWidth: 3,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': $' + ctx.raw + 'M' } }
+      }
+    }
+  });
+
+  // Region chart
+  const regCtx = document.getElementById('regionChart').getContext('2d');
+  new Chart(regCtx, {
+    type: 'bar',
+    data: {
+      labels: ['North America', 'EMEA', 'APAC', 'LATAM'],
+      datasets: [{
+        data: [11.6, 7.9, 4.3, 1.0],
+        backgroundColor: [COLORS.b+'bb', COLORS.p+'bb', COLORS.g+'bb', COLORS.y+'bb'],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: gridOpts, ticks: { callback: v => '$'+v+'M', color: COLORS.s } },
+        y: { grid: { display: false }, ticks: { color: COLORS.s } }
+      }
+    }
+  });
+
+  // Segment chart
+  const segCtx = document.getElementById('segmentChart').getContext('2d');
+  new Chart(segCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Enterprise ($17.2M)', 'Mid-Market ($6.6M)', 'SMB ($1.0M)'],
+      datasets: [{
+        data: [17.2, 6.6, 1.0],
+        backgroundColor: [COLORS.b+'bb', COLORS.g+'bb', COLORS.y+'bb'],
+        borderColor: ['#ffffff'],
+        borderWidth: 3,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '60%',
+      plugins: { legend: { position: 'bottom', labels: { color: COLORS.s, padding: 10, boxWidth: 10 } } }
+    }
+  });
+
+  // ARR Trend
+  const trendCtx = document.getElementById('arrTrendChart').getContext('2d');
+  const months = ['Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'];
+  const arrVals = [17.8,18.4,19.1,19.6,20.1,20.8,21.4,22.0,22.6,23.1,23.7,24.2,24.8];
+  const nrrVals = [109,110,111,111,112,113,113,114,114,115,115,116,116];
+  new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: 'Total ARR ($M)',
+          data: arrVals,
+          borderColor: COLORS.b,
+          backgroundColor: COLORS.b+'18',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: COLORS.b,
+          yAxisID: 'y'
+        },
+        {
+          label: 'NRR (%)',
+          data: nrrVals,
+          borderColor: COLORS.g,
+          backgroundColor: 'transparent',
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: COLORS.g,
+          yAxisID: 'y2',
+          borderDash: [4,2]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: COLORS.s } },
+        y: { grid: gridOpts, ticks: { callback: v => '$'+v+'M', color: COLORS.b }, position: 'left' },
+        y2: { grid: { display: false }, ticks: { callback: v => v+'%', color: COLORS.g }, position: 'right' }
+      }
+    }
+  });
+}
+
+// ── ZONE 2 CHARTS ────────────────────────────────────────────────────
+function initZone2() {
+  // Populate risk table (uses renderRiskTable for filter support)
+  renderRiskTable();
+
+  // Risk distribution chart (dynamic — rebuilt by buildRiskDistChart on filter change)
+  buildRiskDistChart();
+
+  // Signal weights radar/doughnut
+  const sigCtx = document.getElementById('signalChart').getContext('2d');
+  new Chart(sigCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Product Adoption (30%)', 'Usage Trend (20%)', 'Support Sentiment (15%)', 'Stakeholder Engagement (15%)', 'Commercial Indicators (10%)', 'Renewal Proximity (10%)'],
+      datasets: [{
+        data: [30, 20, 15, 15, 10, 10],
+        backgroundColor: [COLORS.b+'cc', COLORS.g+'cc', COLORS.y+'cc', COLORS.p+'cc', COLORS.r+'cc', COLORS.s+'cc'],
+        borderColor: ['#ffffff'],
+        borderWidth: 2,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '55%',
+      plugins: { legend: { position: 'right', labels: { color: COLORS.s, boxWidth: 10, font: { size: 10 } } } }
+    }
+  });
+
+  // Risk Driver Chart (Nexus Financial)
+  const rdrvCtx = document.getElementById('riskDriverChart').getContext('2d');
+  new Chart(rdrvCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Usage Decline','Low Engagement','Exec Sponsor Left','Support Escalations','Renewal Proximity','Competitor Signals','Meeting Cadence'],
+      datasets: [{
+        data: [27, 21, 18, 15, 12, 9, 6],
+        backgroundColor: [
+          COLORS.r+'cc', COLORS.r+'aa', COLORS.r+'88',
+          COLORS.y+'cc', COLORS.y+'aa', COLORS.y+'88', COLORS.s+'88'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.raw + '% contribution to risk score' } }
+      },
+      scales: {
+        x: { grid: gridOpts, ticks: { callback: v => v+'%', color: COLORS.s }, max: 35 },
+        y: { grid: { display: false }, ticks: { color: COLORS.s, font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Risk Trajectory Chart
+  const rtCtx = document.getElementById('riskTrajChart').getContext('2d');
+  const trajMonths = ['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'];
+  const trajData = [18, 22, 39, 61, 72, 78];
+  new Chart(rtCtx, {
+    type: 'line',
+    data: {
+      labels: trajMonths,
+      datasets: [{
+        label: 'Churn Risk Score',
+        data: trajData,
+        borderColor: COLORS.r,
+        backgroundColor: COLORS.r + '18',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 6,
+        pointBackgroundColor: [COLORS.b, COLORS.s, COLORS.y, COLORS.r, COLORS.r, COLORS.r],
+        pointBorderColor: ['#04080f'],
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        annotation: {},
+        tooltip: { callbacks: { label: ctx => 'Risk Score: ' + ctx.raw + '%' } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: COLORS.s } },
+        y: {
+          grid: gridOpts,
+          ticks: { callback: v => v+'%', color: COLORS.s },
+          min: 0, max: 100
+        }
+      }
+    }
+  });
+}
+
+// ── ZONE 3 CHARTS ────────────────────────────────────────────────────
+function initZone3() {
+  // Feature Adoption Heatmap
+  const modules = ['Contracts', 'Trading', 'Market Intel', 'Carbon Analytics'];
+  const hdr = ['<th>Account</th>', ...modules.map(m => `<th>${m}</th>`)].join('');
+  const sorted3 = [...accounts].sort((a,b) => b.risk - a.risk);
+  const rows = sorted3.map(a => {
+    const vals = [a.contracts, a.trading, a.market, a.carbon];
+    const cells = vals.map(v => {
+      const h = heatColor(v);
+      return `<td><span class="hm-cell" style="background:${h.bg};color:${h.color};${h.border?'border:'+h.border:''}">${v}%</span></td>`;
+    }).join('');
+    const riskDot = a.rc === 'high' ? '🔴' : a.rc === 'mod' ? '🟡' : '🟢';
+    return `<tr><td>${riskDot} ${a.name}</td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('heatmapTable').innerHTML = `<thead><tr>${hdr}</tr></thead><tbody>${rows}</tbody>`;
+
+  // Adoption Trend Chart
+  const atCtx = document.getElementById('adoptionTrendChart').getContext('2d');
+  const mos = ['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'];
+  new Chart(atCtx, {
+    type: 'line',
+    data: {
+      labels: mos,
+      datasets: [
+        { label:'Contracts',        data:[72,74,75,76,77,78], borderColor:COLORS.b, tension:0.4, pointRadius:3 },
+        { label:'Trading',          data:[58,60,62,63,64,65], borderColor:COLORS.g, tension:0.4, pointRadius:3 },
+        { label:'Market Intel',     data:[44,46,47,48,49,50], borderColor:COLORS.y, tension:0.4, pointRadius:3 },
+        { label:'Carbon Analytics', data:[18,20,22,24,26,28], borderColor:COLORS.p, tension:0.4, pointRadius:3 },
+      ]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: COLORS.s } },
+        y: { grid: gridOpts, ticks: { callback: v => v+'%', color: COLORS.s }, min: 0, max: 100 }
+      }
+    }
+  });
+
+  // VRI List
+  const sortedVri = [...accounts].sort((a,b) => b.vri - a.vri);
+  const vriC = v => v >= 70 ? COLORS.g : v >= 50 ? COLORS.y : COLORS.r;
+  document.getElementById('vriList').innerHTML = sortedVri.map(a => `
+    <div class="vri-row">
+      <div class="vri-n">${a.name}</div>
+      <div class="vri-bar-wrap">
+        <div class="pbar"><div class="pbfill ${a.vri>=70?'g':a.vri>=50?'y':'r'}" style="width:${a.vri}%"></div></div>
+      </div>
+      <div class="vri-score" style="color:${vriC(a.vri)}">${a.vri}</div>
+    </div>
+  `).join('');
+
+  // VRI Doughnut
+  const vriCtx = document.getElementById('vriChart').getContext('2d');
+  new Chart(vriCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['High Value (6)', 'Moderate Value (5)', 'Low Value (4)'],
+      datasets: [{
+        data: [14.2, 7.1, 3.5],
+        backgroundColor: [COLORS.g+'bb', COLORS.y+'bb', COLORS.r+'bb'],
+        borderColor: ['#ffffff'],
+        borderWidth: 3,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '65%',
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ── ZONE 4 CHARTS ────────────────────────────────────────────────────
+const expansionScores = [
+  { name:'Quantum Energy',      score:91, opp:750000,  arr:3200000, signals:'Near capacity (92%) · Carbon adopted 85% · Industry tailwinds' },
+  { name:'TechFlow Inc',        score:84, opp:580000,  arr:2400000, signals:'Adoption 79% · Ready for Market Intelligence expansion' },
+  { name:'Meridian Capital',    score:82, opp:520000,  arr:1800000, signals:'High NPS 75 · Carbon Analytics whitespace · 5 new hires detected' },
+  { name:'SkyBridge Networks',  score:76, opp:420000,  arr:1800000, signals:'Near capacity · Carbon adoption growing · Exec engaged' },
+  { name:'PrimeCo Industries',  score:74, opp:380000,  arr:1600000, signals:'Adoption 71% · Carbon whitespace · QBR positive sentiment' },
+  { name:'Pacific Commodities', score:72, opp:360000,  arr:1700000, signals:'Carbon 42% — ready to expand · Stakeholder coverage strong' },
+  { name:'NovaTech Solutions',  score:68, opp:280000,  arr:1200000, signals:'Adoption growing · Market Intel whitespace identified' },
+  { name:'CoreLogic Partners',  score:64, opp:240000,  arr:1000000, signals:'Carbon adoption early · Ready for premium tier' },
+];
+
+function initZone4() {
+  // Expansion List
+  document.getElementById('expansionList').innerHTML = expansionScores.map((e,i) => `
+    <div class="exp-row">
+      <div class="exp-rank">#${i+1}</div>
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,212,161,.1);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--green);flex-shrink:0">${e.score}</div>
+      <div class="exp-det">
+        <div class="exp-n">${e.name}</div>
+        <div class="exp-sig">${e.signals}</div>
+      </div>
+      <div class="exp-opp">
+        <div class="exp-arr">+${fmt(e.opp)}</div>
+        <div class="exp-lbl">Expansion ARR</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Expansion Chart (horizontal bar)
+  const expCtx = document.getElementById('expansionChart').getContext('2d');
+  new Chart(expCtx, {
+    type: 'bar',
+    data: {
+      labels: expansionScores.map(e => e.name),
+      datasets: [{
+        label: 'Expansion Score',
+        data: expansionScores.map(e => e.score),
+        backgroundColor: expansionScores.map(e => e.score >= 80 ? COLORS.g+'cc' : e.score >= 70 ? COLORS.g+'88' : COLORS.b+'88'),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: gridOpts, ticks: { color: COLORS.s }, min: 0, max: 100 },
+        y: { grid: { display: false }, ticks: { color: COLORS.s, font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Whitespace Map
+  const wsModules = ['Contracts', 'Trading', 'Market Intel', 'Carbon Analytics', 'Premium Tier', 'API Access'];
+  const wsAccounts = accounts.filter(a => a.rc === 'low' || a.vri >= 60).slice(0, 10);
+
+  function wsCell(pct, module) {
+    if (module === 'Premium Tier') {
+      return pct >= 80 ? { cls:'n', label:'Ready' } : { cls:'w', label:'—' };
+    }
+    if (module === 'API Access') {
+      return pct >= 75 ? { cls:'a', label:'Active' } : { cls:'w', label:'—' };
+    }
+    if (pct >= 75) return { cls:'a', label:pct+'%' };
+    if (pct >= 40) return { cls:'p', label:pct+'%' };
+    return { cls:'w', label:pct+'%' };
+  }
+
+  const wsTbl = document.getElementById('whitespaceTable');
+  const wsHdr = `<thead><tr><th>Account</th>${wsModules.map(m=>`<th>${m}</th>`).join('')}</tr></thead>`;
+  const wsRows = wsAccounts.map(a => {
+    const vals = { 'Contracts':a.contracts,'Trading':a.trading,'Market Intel':a.market,'Carbon Analytics':a.carbon,'Premium Tier':a.adopt,'API Access':a.adopt };
+    const cells = wsModules.map(m => {
+      const c = wsCell(vals[m], m);
+      return `<td><span class="ws-c ${c.cls}">${c.label}</span></td>`;
+    }).join('');
+    return `<tr><td>${a.name}</td>${cells}</tr>`;
+  }).join('');
+  wsTbl.innerHTML = wsHdr + `<tbody>${wsRows}</tbody>`;
+}
+
+// ── ZONE 5 CHARTS ────────────────────────────────────────────────────
+const renewals = {
+  d30: [
+    { name:'Apex Manufacturing', arr:1900000, prob:42, risk:'high', days:63, notes:'Exec sponsor needed · Low adoption' },
+    { name:'BlueStar Trading',   arr:500000,  prob:58, risk:'mod',  days:28, notes:'Usage stable · Pricing negotiation' },
+  ],
+  d90: [
+    { name:'Nexus Financial',    arr:2800000, prob:35, risk:'high', days:87,  notes:'Critical escalation · Usage -41%' },
+    { name:'Vertex Analytics',   arr:1400000, prob:52, risk:'high', days:102, notes:'NPS low · Adoption recovering' },
+    { name:'CloudBase Systems',  arr:800000,  prob:68, risk:'mod',  days:145, notes:'Re-engagement in progress' },
+  ],
+  d180: [
+    { name:'GlobalTrade GmbH',   arr:2100000, prob:71, risk:'mod',  days:178, notes:'Carbon activation critical' },
+    { name:'DataStream Corp',    arr:600000,  prob:74, risk:'mod',  days:167, notes:'Feature adoption improving' },
+    { name:'NovaTech Solutions', arr:1200000, prob:82, risk:'low',  days:220, notes:'Healthy · Expansion candidate' },
+    { name:'SkyBridge Networks', arr:1800000, prob:88, risk:'low',  days:248, notes:'Strong NPS · Likely expand' },
+    { name:'CoreLogic Partners', arr:1000000, prob:86, risk:'low',  days:275, notes:'Stable growth track' },
+    { name:'Pacific Commodities',arr:1700000, prob:90, risk:'low',  days:265, notes:'Top tier account · Expanding' },
+  ]
+};
+
+function renProbColor(p) { return p >= 75 ? COLORS.g : p >= 55 ? COLORS.y : COLORS.r; }
+
+function initZone5() {
+  const pipe = document.getElementById('renewalPipeline');
+  const bktDefs = [
+    { key:'d30', label:'Due Within 30 Days', color:COLORS.r },
+    { key:'d90', label:'Due Within 90 Days', color:COLORS.y },
+    { key:'d180',label:'Due Within 180 Days',color:COLORS.b },
+  ];
+
+  pipe.innerHTML = bktDefs.map(b => {
+    const items = renewals[b.key];
+    const total = items.reduce((s,i)=>s+i.arr,0);
+    const rows = items.map(r => `
+      <div class="ren-item">
+        <div class="ren-acc">${r.name}</div>
+        <div class="ren-arr">${fmt(r.arr)}</div>
+        <div class="ren-row">
+          <span class="ren-prob" style="color:${renProbColor(r.prob)}">${r.prob}% renewal prob</span>
+          <span class="rb ${r.risk==='high'?'high':r.risk==='mod'?'mod':'low'}" style="font-size:9px">● ${r.risk==='high'?'High':r.risk==='mod'?'Moderate':'Low'}</span>
+        </div>
+        <div style="font-size:10px;color:var(--text-m);margin-top:4px">${r.notes}</div>
+        <div style="margin-top:6px"><div class="pbar"><div class="pbfill ${r.prob>=75?'g':r.prob>=55?'y':'r'}" style="width:${r.prob}%"></div></div></div>
+      </div>
+    `).join('');
+    return `
+      <div class="ren-bkt">
+        <div class="ren-bkt-hdr" style="border-top:2px solid ${b.color}">
+          <div>
+            <div class="ren-bkt-t">${b.label}</div>
+            <div class="ren-bkt-c">${fmt(total)} at stake</div>
+          </div>
+          <span style="font-size:18px;font-weight:800;color:${b.color}">${items.length}</span>
+        </div>
+        ${rows}
+      </div>
+    `;
+  }).join('');
+
+  // Renewal Forecast Chart
+  const rfCtx = document.getElementById('renewalForecastChart').getContext('2d');
+  const rfMonths = ['Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26','Jan 27','Feb 27'];
+  new Chart(rfCtx, {
+    type: 'line',
+    data: {
+      labels: rfMonths,
+      datasets: [
+        { label:'Best Case',  data:[24.8,25.4,25.9,26.1,26.3,26.4,26.4,26.4,26.4,26.4,26.4,26.4], borderColor:COLORS.g, backgroundColor:COLORS.g+'10', fill:true, tension:0.4, pointRadius:2 },
+        { label:'Expected',   data:[24.8,24.9,25.0,25.1,25.1,24.9,24.8,24.8,24.8,24.8,24.8,24.8], borderColor:COLORS.b, backgroundColor:COLORS.b+'10', fill:true, tension:0.4, pointRadius:2 },
+        { label:'Worst Case', data:[24.8,24.0,23.2,22.1,21.4,20.9,20.7,20.7,20.7,20.7,20.7,20.7], borderColor:COLORS.r, backgroundColor:COLORS.r+'10', fill:true, tension:0.4, pointRadius:2 },
+      ]
+    },
+    options: {
+      interaction: { mode:'index', intersect:false },
+      plugins: { legend: { display:false } },
+      scales: {
+        x: { grid:{ display:false }, ticks:{ color:COLORS.s } },
+        y: { grid:gridOpts, ticks:{ callback: v => '$'+v+'M', color:COLORS.s }, min:18, max:28 }
+      }
+    }
+  });
+}
+
+// ── ZONE INIT MAP ────────────────────────────────────────────────────
+const zoneInits = {
+  zone2: initZone2,
+  zone3: initZone3,
+  zone4: initZone4,
+  zone5: initZone5,
+  zone6: () => {} // action center is static HTML
+};
+
+// ── INIT ──────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initd.add('zone1');
+  setTimeout(initZone1, 100);
+});
+</script>
+</body>
+</html>
